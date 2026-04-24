@@ -15,6 +15,8 @@ use Flarum\Extend;
 use Flarum\Frontend\Document;
 use Flarum\Settings\SettingsRepositoryInterface;
 use Illuminate\Support\Arr;
+use Resofire\PWA\Api\Controller\DeleteIconsController;
+use Resofire\PWA\Api\Controller\UploadIconController;
 use Resofire\PWA\Forum\Controller\OfflineController;
 use Resofire\PWA\Forum\Controller\ServiceWorkerController;
 use Resofire\PWA\Forum\Controller\WebManifestController;
@@ -33,6 +35,13 @@ $metaClosure = function (Document $document) {
 };
 
 return [
+    // -------------------------------------------------------------------------
+    // API routes
+    // -------------------------------------------------------------------------
+    (new Extend\Routes('api'))
+        ->post('/resofire-pwa/icons', 'resofire-pwa.icons.upload', UploadIconController::class)
+        ->delete('/resofire-pwa/icons', 'resofire-pwa.icons.delete', DeleteIconsController::class),
+
     // -------------------------------------------------------------------------
     // Forum routes
     // -------------------------------------------------------------------------

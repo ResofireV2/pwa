@@ -36,7 +36,16 @@ resofire-pwa:
     icons:
       heading: Icon management
       help: "Upload a single high-resolution source image and all required sizes will be generated automatically."
-      coming_soon: "Full icon upload and auto-generation will be available in a later update."
+      recommend: "Recommended source size: 1024×1024 PNG. The image will be cropped to a square at each size."
+      sizes_heading: Generated sizes
+      upload_button: Upload source image
+      replace_button: Replace icons
+      delete_button: Delete all icons
+      delete_confirm: "Delete all generated icons? This cannot be undone."
+      upload_error: "Upload failed. Please try again."
+      delete_error: "Delete failed. Please try again."
+      required: Required
+      required_ok: "✓ Ready"
 
     android:
       banner_heading: Install banner
@@ -118,6 +127,8 @@ resofire-pwa:
       name_ok_body: "Your app name is configured and will appear on install prompts and the splash screen."
       name_err: App name not set
       name_err_body: "Set an app name on the General tab. The forum title will be used as a fallback."
+      icons_ok: Icons ready
+      icons_ok_body: "Required icons (192×192 and 180×180) are uploaded and ready."
       icons_err: No icons uploaded
       icons_err_body: "At least a 192x192 and 512x512 icon are required for the app to be installable. Icon upload is coming in a later update."
       vapid_err: VAPID keys not configured

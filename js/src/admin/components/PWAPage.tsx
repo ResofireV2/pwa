@@ -3,6 +3,7 @@ import ExtensionPage from 'flarum/admin/components/ExtensionPage';
 import FieldSet from 'flarum/common/components/FieldSet';
 import type Mithril from 'mithril';
 import SplashPreview from './SplashPreview';
+import IconUploadButton from './IconUploadButton';
 
 const PREFIX = 'resofire-pwa';
 
@@ -146,11 +147,79 @@ export default class PWAPage extends ExtensionPage {
   // ── Icons ────────────────────────────────────────────────────────────────────
 
   private renderIcons(): Mithril.Children {
+    const sizes = [512, 384, 192, 180, 152, 144, 96, 48];
+    const required = [192, 180];
+    const assetsBase = (app.forum.attribute('assetsBaseUrl') as string) || '';
+
+    const iconUrl = (path: string): string =>
+      path ? `${assetsBase}/${path}` : '';
+
+    const hasAny = sizes.some(
+      (s) => !!app.data.settings[`resofire-pwa.icon_${s}_path`]
+    );
+
+    const onSuccess = (generated: Record<string, { path: string; url: string }>) => {
+      Object.entries(generated).forEach(([key, val]) => {
+        app.data.settings[key] = val.path;
+      });
+      m.redraw();
+    };
+
+    const onDelete = () => {
+      sizes.forEach((s) => {
+        delete app.data.settings[`resofire-pwa.icon_${s}_path`];
+      });
+      delete app.data.settings['resofire-pwa.icon_maskable_path'];
+      m.redraw();
+    };
+
     return (
       <div>
         <FieldSet label={tr('icons.heading')}>
           <p className="helpText">{tr('icons.help')}</p>
-          <p className="helpText">{tr('icons.coming_soon')}</p>
+          <p className="helpText">{tr('icons.recommend')}</p>
+
+          <div style="margin: 16px 0;">
+            <IconUploadButton
+              hasIcons={hasAny}
+              onSuccess={onSuccess}
+              onDelete={onDelete}
+            />
+          </div>
+        </FieldSet>
+
+        <FieldSet label={tr('icons.sizes_heading')}>
+          <div className="PWAPage-icon-grid">
+            {sizes.map((size) => {
+              const key    = `resofire-pwa.icon_${size}_path`;
+              const path   = app.data.settings[key];
+              const url    = path ? iconUrl(path) : '';
+              const filled = !!path;
+              const isReq  = required.includes(size);
+
+              return (
+                <div
+                  key={size}
+                  className={'PWAPage-icon-slot' + (filled ? ' is-filled' : '')}
+                >
+                  <div className="PWAPage-icon-slot-thumb">
+                    {filled && url
+                      ? <img src={url} alt={`${size}x${size}`} />
+                      : <i className="fas fa-image" />
+                    }
+                  </div>
+                  <div className="PWAPage-icon-slot-size">{size}×{size}</div>
+                  {isReq && (
+                    <span className={'PWAPage-icon-required' + (filled ? ' is-ok' : '')}>
+                      {filled
+                        ? tr('icons.required_ok')
+                        : tr('icons.required')}
+                    </span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </FieldSet>
       </div>
     );
@@ -389,8 +458,18 @@ export default class PWAPage extends ExtensionPage {
         : { type: 'err', title: tr('status.name_err'), body: tr('status.name_err_body') }
     );
 
-    // Icons and VAPID — both require later stages; always show as pending for now.
-    checks.push({ type: 'err', title: tr('status.icons_err'), body: tr('status.icons_err_body') });
+    // Icons — check whether both required sizes (192 and 180) are present.
+    const has192 = !!app.data.settings['resofire-pwa.icon_192_path'];
+    const has180 = !!app.data.settings['resofire-pwa.icon_180_path'];
+    const iconsReady = has192 && has180;
+
+    checks.push(
+      iconsReady
+        ? { type: 'ok',  title: tr('status.icons_ok'),  body: tr('status.icons_ok_body')  }
+        : { type: 'err', title: tr('status.icons_err'), body: tr('status.icons_err_body') }
+    );
+
+    // VAPID keys — implemented in Stage 7.
     checks.push({ type: 'err', title: tr('status.vapid_err'), body: tr('status.vapid_err_body') });
 
     return checks;
