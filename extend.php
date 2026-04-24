@@ -144,5 +144,9 @@ return [
         ->serializeToForum('resofire-pwa.iosAutoDetectOrientation',   'resofire-pwa.iosAutoDetectOrientation',   'boolval')
         ->serializeToForum('resofire-pwa.iosPadAlwaysUp',             'resofire-pwa.iosPadAlwaysUp',             'boolval')
         // Serialize VAPID public key so the forum JS can subscribe to push.
-        ->serializeToForum('resofire-pwa.vapidPublicKey', 'resofire-pwa.vapid.public'),
+        ->serializeToForum('resofire-pwa.vapidPublicKey',    'resofire-pwa.vapid.public')
+        ->serializeToForum('resofire-pwa.pushPromptEnabled', 'resofire-pwa.pushPromptEnabled', 'boolval')
+        ->serializeToForum('resofire-pwa.pushPromptDelay',   'resofire-pwa.pushPromptDelay',   'intval')
+        ->serializeToForum('resofire-pwa.pushPromptTitle',   'resofire-pwa.pushPromptTitle')
+        ->serializeToForum('resofire-pwa.pushPromptBody',    'resofire-pwa.pushPromptBody'),
 ];
