@@ -106,5 +106,20 @@ return [
         ->default('resofire-pwa.pushPromptBody', '')
         ->default('resofire-pwa.pushPromptDelay', 2000)
         ->default('resofire-pwa.userMaxSubscriptions', 20)
-        ->default('resofire-pwa.debugMode', false),
+        ->default('resofire-pwa.debugMode', false)
+        // Serialize install prompt settings to the forum frontend.
+        ->serializeToForum('resofire-pwa.appName',                    'resofire-pwa.longName')
+        ->serializeToForum('resofire-pwa.androidBannerEnabled',       'resofire-pwa.androidBannerEnabled',       'boolval')
+        ->serializeToForum('resofire-pwa.androidBannerText',          'resofire-pwa.androidBannerText')
+        ->serializeToForum('resofire-pwa.androidInstallText',         'resofire-pwa.androidInstallText')
+        ->serializeToForum('resofire-pwa.androidSheetEnabled',        'resofire-pwa.androidSheetEnabled',        'boolval')
+        ->serializeToForum('resofire-pwa.androidSheetDelay',          'resofire-pwa.androidSheetDelay',          'intval')
+        ->serializeToForum('resofire-pwa.androidSheetFeatureOffline', 'resofire-pwa.androidSheetFeatureOffline', 'boolval')
+        ->serializeToForum('resofire-pwa.androidSheetFeaturePush',    'resofire-pwa.androidSheetFeaturePush',    'boolval')
+        ->serializeToForum('resofire-pwa.androidSheetFeatureFullscreen', 'resofire-pwa.androidSheetFeatureFullscreen', 'boolval')
+        ->serializeToForum('resofire-pwa.iosPromptEnabled',           'resofire-pwa.iosPromptEnabled',           'boolval')
+        ->serializeToForum('resofire-pwa.iosPromptText',              'resofire-pwa.iosPromptText')
+        ->serializeToForum('resofire-pwa.iosPromptDelay',             'resofire-pwa.iosPromptDelay',             'intval')
+        ->serializeToForum('resofire-pwa.iosAutoDetectOrientation',   'resofire-pwa.iosAutoDetectOrientation',   'boolval')
+        ->serializeToForum('resofire-pwa.iosPadAlwaysUp',             'resofire-pwa.iosPadAlwaysUp',             'boolval'),
 ];

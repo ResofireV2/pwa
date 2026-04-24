@@ -1,2 +1,310 @@
 // resofire/pwa — forum styles
-// Forum-facing styles will be added in later stages.
+
+@primary:   var(--primary-color);
+@body-bg:   var(--body-bg);
+@surface:   var(--control-bg);
+@text:      var(--text-color);
+@muted:     var(--muted-color);
+@border:    var(--control-bg-shaded);
+@shadow:    var(--shadow-color);
+
+// ── Install banner ────────────────────────────────────────────────────────────
+
+.PWA-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--header-bg);
+  border-bottom: 1px solid @border;
+  width: 100%;
+}
+
+.PWA-banner-body {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.PWA-banner-text {
+  font-size: 13px;
+  color: var(--header-color);
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.PWA-banner-install {
+  flex-shrink: 0;
+  font-size: 12px;
+  padding: 5px 12px;
+}
+
+.PWA-banner-dismiss {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--header-color);
+  opacity: 0.6;
+  padding: 4px 6px;
+  border-radius: 4px;
+  line-height: 1;
+  transition: opacity 0.12s;
+
+  &:hover { opacity: 1; }
+}
+
+// ── Install sheet ─────────────────────────────────────────────────────────────
+
+.PWA-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0);
+  z-index: 1000;
+  pointer-events: none;
+  transition: background 0.25s;
+
+  &.is-visible {
+    background: rgba(0, 0, 0, 0.5);
+    pointer-events: all;
+  }
+}
+
+.PWA-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: @body-bg;
+  border-radius: 16px 16px 0 0;
+  padding: 12px 20px 32px;
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  max-width: 560px;
+  margin: 0 auto;
+
+  &.is-visible {
+    transform: translateY(0);
+  }
+}
+
+.PWA-sheet-handle {
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: @border;
+  margin: 0 auto 20px;
+}
+
+.PWA-sheet-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.PWA-sheet-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background: @primary;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 14px;
+
+  i {
+    font-size: 24px;
+    color: #fff;
+  }
+}
+
+.PWA-sheet-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: @text;
+  margin-bottom: 6px;
+}
+
+.PWA-sheet-subtitle {
+  font-size: 13px;
+  color: @muted;
+  line-height: 1.5;
+}
+
+.PWA-sheet-features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.PWA-sheet-feature {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  color: @text;
+}
+
+.PWA-sheet-feature-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  background: @surface;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  i {
+    font-size: 15px;
+    color: @primary;
+  }
+}
+
+.PWA-sheet-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.PWA-sheet-btn-install {
+  width: 100%;
+  padding: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  justify-content: center;
+}
+
+.PWA-sheet-btn-later {
+  width: 100%;
+  padding: 12px;
+  font-size: 14px;
+  color: @muted;
+  justify-content: center;
+  background: transparent;
+  border-color: transparent;
+
+  &:hover { background: @surface; }
+}
+
+// ── Apple prompt ──────────────────────────────────────────────────────────────
+
+.PWA-apple {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 32px);
+  max-width: 480px;
+  background: @body-bg;
+  border: 1px solid @border;
+  border-radius: 14px;
+  padding: 14px 40px 14px 14px;
+  box-shadow: 0 4px 24px @shadow;
+  z-index: 1001;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  // Arrow pointing down (iPhone portrait — share button in bottom bar)
+  &.PWA-apple--arrow-down {
+    bottom: 80px;
+
+    .PWA-apple-arrow {
+      bottom: -9px;
+      border-color: @border transparent transparent transparent;
+      border-top-color: @body-bg;
+      &::before {
+        bottom: 2px;
+        border-color: @border transparent transparent transparent;
+      }
+    }
+  }
+
+  // Arrow pointing up (iPhone landscape / iPad — share button in top bar)
+  &.PWA-apple--arrow-up {
+    top: 60px;
+
+    .PWA-apple-arrow {
+      top: -9px;
+      border-color: transparent transparent @body-bg transparent;
+      &::before {
+        top: 2px;
+        border-color: transparent transparent @border transparent;
+      }
+    }
+  }
+}
+
+.PWA-apple-body {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.PWA-apple-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: @surface;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  i {
+    font-size: 16px;
+    color: @primary;
+  }
+}
+
+.PWA-apple-text {
+  font-size: 13px;
+  color: @text;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.PWA-apple-dismiss {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: @muted;
+  padding: 4px;
+  border-radius: 4px;
+  line-height: 1;
+  transition: color 0.12s;
+
+  &:hover { color: @text; }
+}
+
+.PWA-apple-arrow {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 9px;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: -9px;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 9px;
+  }
+}
