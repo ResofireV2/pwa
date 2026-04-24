@@ -33,7 +33,6 @@ async function dbSet(key, val) {
 // ── Cache names ───────────────────────────────────────────────────────────────
 
 const CACHE_ASSETS  = 'resofire-pwa-assets-v1';
-const CACHE_SHELL   = 'resofire-pwa-shell-v3';  // bumped — clears stale v1 entries on update
 const CACHE_OFFLINE = 'resofire-pwa-offline-v1';
 
 const OFFLINE_URL = 'offline';
@@ -73,7 +72,7 @@ self.addEventListener('activate', function (event) {
             self.clients.claim(),
             // Remove any caches from previous versions.
             caches.keys().then(function (keys) {
-                const current = [CACHE_ASSETS, CACHE_SHELL, CACHE_OFFLINE];
+                const current = [CACHE_ASSETS, CACHE_OFFLINE];
                 return Promise.all(
                     keys
                         .filter(function (key) {
@@ -168,8 +167,10 @@ self.addEventListener('fetch', function (event) {
         // Network-first for API, admin, and auth paths — never cache these.
         event.respondWith(networkFirst(request));
     } else if (isNavigation) {
-        // Stale-while-revalidate for the forum shell.
-        event.respondWith(staleWhileRevalidate(request, CACHE_SHELL));
+        // Navigation always goes to network so Flarum's baked-in session
+        // payload (flarum-json-payload) is always fresh. Fall back to the
+        // offline page only when the network is unreachable.
+        event.respondWith(navigationRequest(request));
     }
     // All other requests (third-party, etc.) pass through unhandled.
 });
@@ -204,32 +205,13 @@ async function networkFirst(request) {
     }
 }
 
-async function staleWhileRevalidate(request, cacheName) {
-    const cache  = await caches.open(cacheName);
-    const cached = await cache.match(request);
-
-    // Fire off a background revalidation regardless.
-    const networkPromise = fetch(request).then(function (response) {
-        if (response.ok) {
-            // Good response — update the cache.
-            cache.put(request, response.clone());
-        } else {
-            // Error response — evict the stale cached entry so the next
-            // request goes to the network fresh rather than serving stale data.
-            cache.delete(request);
-        }
-        return response;
-    }).catch(function () {
-        return null;
-    });
-
-    // Return cached immediately if available, otherwise wait for network.
-    if (cached) return cached;
-
-    const networkResponse = await networkPromise;
-    if (networkResponse) return networkResponse;
-
-    return offlineFallback(request);
+async function navigationRequest(request) {
+    try {
+        return await fetch(request);
+    } catch (e) {
+        // Network unreachable — serve the offline fallback page.
+        return offlineFallback(request);
+    }
 }
 
 async function offlineFallback(request) {
