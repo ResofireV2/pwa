@@ -12,6 +12,7 @@ import PushModal, { subscribeUserToPush } from './components/PushModal';
 import {
   isStandalone,
   isIOS,
+  isMobile,
   isSafari,
   isFirstVisit,
   isSecondVisit,
@@ -152,6 +153,10 @@ function evaluatePrompts(): void {
     }
     return;
   }
+
+  // Banner and sheet are for mobile Android only.
+  // Desktop users have the browser's own install button in the address bar.
+  if (!isMobile()) return;
 
   if (!deferredPrompt) return;
 
