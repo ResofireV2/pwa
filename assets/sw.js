@@ -1,20 +1,29 @@
 /**
  * resofire/pwa — Service Worker
  *
- * Caching strategy:
- *   Assets (JS/CSS/fonts/images) — cache-first
- *   API requests (/api/*)        — network-first
- *   Forum shell (navigation)     — stale-while-revalidate
- *   Offline fallback             — cache on install, always available
+ * Cache policy:
+ *
+ *   Navigation requests (any mode):
+ *     Always network-first. The offline page is served only when the
+ *     network is genuinely unreachable. Flarum bakes session data into
+ *     the HTML payload, so caching HTML would cause stale session state.
+ *
+ *   Asset requests (JS/CSS/fonts/images from assetsBaseUrl):
+ *     Cache-first, but ONLY when running as an installed PWA (standalone
+ *     display mode). In a regular browser tab the SW is transparent —
+ *     assets go straight to the network.
+ *
+ *   Everything else (API, admin, auth, third-party):
+ *     Always passes through to the network untouched.
  */
 
 importScripts('assets/extensions/resofire-pwa/idb.js');
 
 // ── IDB setup ─────────────────────────────────────────────────────────────────
 
-const DB_NAME      = 'keyval-store';
-const DB_VERSION   = 1;
-const STORE_NAME   = 'keyval';
+const DB_NAME    = 'keyval-store';
+const DB_VERSION = 1;
+const STORE_NAME = 'keyval';
 
 const dbPromise = idb.openDB(DB_NAME, DB_VERSION, {
     upgrade(db) {
@@ -37,9 +46,9 @@ const CACHE_OFFLINE = 'resofire-pwa-offline-v1';
 
 const OFFLINE_URL = 'offline';
 
-// Forum payload read from IDB — populated by the forum JS on registration.
-// Keys we use: basePath, assetsBaseUrl, debug
-let forumPayload = {};
+// Forum payload populated from IDB on install, and updated via postMessage.
+// Keys used: assetsBaseUrl, debug, isStandalone
+var forumPayload = {};
 
 // ── Install ───────────────────────────────────────────────────────────────────
 
@@ -50,16 +59,13 @@ self.addEventListener('install', function (event) {
             caches.open(CACHE_OFFLINE).then(function (cache) {
                 return cache.add(OFFLINE_URL);
             }),
-            // Read forum payload from IDB so we have it immediately.
+            // Read forum payload from IDB.
             dbGet('flarum.forumPayload').then(function (payload) {
-                if (payload) {
-                    Object.assign(forumPayload, payload);
-                }
+                if (payload) Object.assign(forumPayload, payload);
             }),
         ])
     );
 
-    // Activate immediately — do not wait for existing tabs to close.
     self.skipWaiting();
 });
 
@@ -68,9 +74,8 @@ self.addEventListener('install', function (event) {
 self.addEventListener('activate', function (event) {
     event.waitUntil(
         Promise.all([
-            // Claim all clients immediately.
             self.clients.claim(),
-            // Remove any caches from previous versions.
+            // Remove any caches from previous SW versions.
             caches.keys().then(function (keys) {
                 const current = [CACHE_ASSETS, CACHE_OFFLINE];
                 return Promise.all(
@@ -94,12 +99,10 @@ self.addEventListener('message', function (event) {
 
     switch (event.data.type) {
         case 'FORUM_PAYLOAD':
-            // Forum JS sends updated payload on every registration.
             Object.assign(forumPayload, event.data.payload);
             break;
 
         case 'PAGE_VISIT':
-            // Forum JS sends the current page URL and title on each navigation.
             recordRecentPage(event.data.url, event.data.title);
             break;
     }
@@ -107,26 +110,14 @@ self.addEventListener('message', function (event) {
 
 async function recordRecentPage(url, title) {
     if (!url || !title) return;
-
     try {
-        const MAX_PAGES = 10;
-        let pages = (await dbGet('resofire-pwa.recentPages')) || [];
-
-        // Remove existing entry for this URL if present.
+        const MAX = 10;
+        var pages = (await dbGet('resofire-pwa.recentPages')) || [];
         pages = pages.filter(function (p) { return p.url !== url; });
-
-        // Prepend the new entry.
         pages.unshift({ url: url, title: title });
-
-        // Trim to max.
-        if (pages.length > MAX_PAGES) {
-            pages = pages.slice(0, MAX_PAGES);
-        }
-
+        if (pages.length > MAX) pages = pages.slice(0, MAX);
         await dbSet('resofire-pwa.recentPages', pages);
-    } catch (e) {
-        // IDB errors should never break page navigation.
-    }
+    } catch (e) {}
 }
 
 // ── Fetch ─────────────────────────────────────────────────────────────────────
@@ -134,92 +125,66 @@ async function recordRecentPage(url, title) {
 self.addEventListener('fetch', function (event) {
     const request = event.request;
 
-    // Only handle GET requests.
+    // Only intercept GET requests over HTTP.
     if (request.method !== 'GET') return;
-
-    // Never cache chrome-extension or non-http requests.
     if (!request.url.startsWith('http')) return;
 
-    // In debug mode, bypass the cache entirely.
+    // Debug mode: SW is completely transparent.
     if (forumPayload.debug) return;
 
-    const url = new URL(request.url);
-
-    // Determine the request type.
-    const assetsBase = forumPayload.assetsBaseUrl || '';
-    const basePath   = forumPayload.basePath   || '';
-    const apiPath    = basePath + '/api/';
-
-    const isAsset      = assetsBase && request.url.startsWith(assetsBase);
-    const isApi        = url.pathname.startsWith(apiPath) || url.pathname === basePath + '/api';
-    const isAdminPath  = url.pathname.startsWith(basePath + '/admin');
-    // Auth paths must always hit the network — caching login/logout/register
-    // would cause the UI to show stale session state after auth changes.
-    const isAuthPath   = ['/login', '/logout', '/register', '/confirm-email'].some(
-        function (p) { return url.pathname === basePath + p || url.pathname.startsWith(basePath + p + '/'); }
-    );
     const isNavigation = request.mode === 'navigate';
 
-    if (isAsset) {
-        // Cache-first for assets (JS, CSS, fonts, images).
-        event.respondWith(cacheFirst(request, CACHE_ASSETS));
-    } else if (isApi || isAdminPath || isAuthPath) {
-        // Network-first for API, admin, and auth paths — never cache these.
-        event.respondWith(networkFirst(request));
-    } else if (isNavigation) {
-        // Navigation always goes to network so Flarum's baked-in session
-        // payload (flarum-json-payload) is always fresh. Fall back to the
-        // offline page only when the network is unreachable.
-        event.respondWith(navigationRequest(request));
+    // ── Navigation: always network, offline fallback only ──────────────────
+    // Never cache HTML. Flarum bakes session + extension state into the
+    // page payload — serving stale HTML breaks login/logout and extension
+    // enable/disable without a hard reload.
+    if (isNavigation) {
+        event.respondWith(
+            fetch(request).catch(function () {
+                return offlineFallback();
+            })
+        );
+        return;
     }
-    // All other requests (third-party, etc.) pass through unhandled.
+
+    // ── Assets: cache only when running as installed PWA ───────────────────
+    // In a normal browser tab the SW is invisible — everything hits the
+    // network. In standalone mode we serve assets from cache for speed and
+    // offline resilience.
+    if (!forumPayload.isStandalone) return;
+
+    const assetsBase = forumPayload.assetsBaseUrl || '';
+    const isAsset    = assetsBase && request.url.startsWith(assetsBase);
+
+    if (isAsset) {
+        event.respondWith(cacheFirst(request));
+    }
+    // All other requests (API, admin, third-party) pass through untouched.
 });
 
 // ── Caching strategies ────────────────────────────────────────────────────────
 
-async function cacheFirst(request, cacheName) {
-    const cached = await caches.match(request);
+async function cacheFirst(request) {
+    const cache  = await caches.open(CACHE_ASSETS);
+    const cached = await cache.match(request);
     if (cached) return cached;
 
     try {
         const response = await fetch(request);
         if (response.ok) {
-            const cache = await caches.open(cacheName);
             cache.put(request, response.clone());
         }
         return response;
     } catch (e) {
-        return offlineFallback(request);
+        // Asset unavailable offline — return a minimal error response.
+        return new Response('', { status: 503 });
     }
 }
 
-async function networkFirst(request) {
-    try {
-        return await fetch(request);
-    } catch (e) {
-        // API offline — return nothing (let the app handle the error).
-        return new Response(JSON.stringify({ errors: [{ status: '503', title: 'Offline' }] }), {
-            status: 503,
-            headers: { 'Content-Type': 'application/json' },
-        });
-    }
-}
-
-async function navigationRequest(request) {
-    try {
-        return await fetch(request);
-    } catch (e) {
-        // Network unreachable — serve the offline fallback page.
-        return offlineFallback(request);
-    }
-}
-
-async function offlineFallback(request) {
-    if (request.mode === 'navigate') {
-        const offlineCache = await caches.open(CACHE_OFFLINE);
-        const fallback = await offlineCache.match(OFFLINE_URL);
-        if (fallback) return fallback;
-    }
+async function offlineFallback() {
+    const cache    = await caches.open(CACHE_OFFLINE);
+    const fallback = await cache.match(OFFLINE_URL);
+    if (fallback) return fallback;
     return new Response('Offline', { status: 503 });
 }
 
@@ -228,12 +193,8 @@ async function offlineFallback(request) {
 self.addEventListener('push', function (event) {
     if (!event.data) return;
 
-    let data;
-    try {
-        data = event.data.json();
-    } catch (e) {
-        return;
-    }
+    var data;
+    try { data = event.data.json(); } catch (e) { return; }
 
     event.waitUntil(
         self.registration.showNotification(data.title || '', {

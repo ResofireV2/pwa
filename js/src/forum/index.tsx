@@ -194,7 +194,10 @@ async function registerServiceWorker(basePath: string): Promise<void> {
     if (controller) {
       controller.postMessage({
         type:    'FORUM_PAYLOAD',
-        payload: app.forum.data.attributes,
+        payload: {
+          ...app.forum.data.attributes,
+          isStandalone: isStandalone(),
+        },
       });
     }
   } catch {
