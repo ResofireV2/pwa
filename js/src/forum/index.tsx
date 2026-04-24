@@ -2,7 +2,6 @@ import app from 'flarum/forum/app';
 import { extend } from 'flarum/common/extend';
 import Page from 'flarum/common/components/Page';
 import Notices from 'flarum/forum/components/Notices';
-import NotificationGrid from 'flarum/forum/components/NotificationGrid';
 import { openDB } from 'idb';
 import type ItemList from 'flarum/common/utils/ItemList';
 import type Mithril from 'mithril';
@@ -83,7 +82,9 @@ app.initializers.add('resofire-pwa', () => {
   });
 
   // ── Push notification column in NotificationGrid ─────────────────────────
-  extend(NotificationGrid.prototype, 'notificationMethods', function (items: ItemList<any>) {
+  // Use the string path form — NotificationGrid is not in flarum.reg directly
+  // but is resolvable via flarum.reg.onLoad when SettingsPage loads it.
+  extend('flarum/forum/components/NotificationGrid', 'notificationMethods', function (items: ItemList<any>) {
     if (!app.forum.attribute<string>('resofire-pwa.vapidPublicKey')) return;
 
     items.add('push', {
