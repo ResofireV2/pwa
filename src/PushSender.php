@@ -138,10 +138,14 @@ class PushSender
             $payload['badge'] = $this->assetsFilesystem->url($faviconPath);
         }
 
-        // Use the largest uploaded PWA icon as the notification icon.
-        $icons = array_reverse($this->getIcons());
+        // Use the largest non-maskable PWA icon as the notification icon.
+        // Maskable icons are excluded — they are designed to be cropped and
+        // browsers do not use them for notification display.
+        $icons = array_reverse(array_filter($this->getIcons(), function ($icon) {
+            return !isset($icon['purpose']) || $icon['purpose'] !== 'maskable';
+        }));
         if (!empty($icons)) {
-            $payload['icon'] = $icons[0]['src'];
+            $payload['icon'] = array_values($icons)[0]['src'];
         } elseif ($logoPath = $this->settings->get('logo_path')) {
             $payload['icon'] = $this->assetsFilesystem->url($logoPath);
         }

@@ -373,3 +373,27 @@
     color: var(--enabled-color);
   }
 }
+
+// ── Resettable color field ────────────────────────────────────────────────────
+
+.ResettableColorField {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 280px;
+}
+
+.ResettableColorField-input {
+  flex: 1;
+  font-family: monospace;
+  font-size: 13px;
+}
+
+.ResettableColorField-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 5px;
+  border: 1px solid @border;
+  flex-shrink: 0;
+  display: inline-block;
+}

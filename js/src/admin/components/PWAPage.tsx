@@ -4,6 +4,7 @@ import FieldSet from 'flarum/common/components/FieldSet';
 import type Mithril from 'mithril';
 import SplashPreview from './SplashPreview';
 import IconUploadButton from './IconUploadButton';
+import ResettableColorField from './ResettableColorField';
 
 const PREFIX = 'resofire-pwa';
 
@@ -99,20 +100,18 @@ export default class PWAPage extends ExtensionPage {
           <div className="PWAPage-appearance-settings">
             <div className="PWAPage-appearance-label">{tr('general.appearance_heading')}</div>
 
-            {this.buildSettingComponent({
-              setting: `${PREFIX}.themeColor`,
-              label: tr('general.theme_color_label'),
-              help:  tr('general.theme_color_help'),
-              type:  'color-preview',
-              value: this.setting(`${PREFIX}.themeColor`, primaryColor)(),
-            })}
-            {this.buildSettingComponent({
-              setting: `${PREFIX}.backgroundColor`,
-              label: tr('general.background_color_label'),
-              help:  tr('general.background_color_help'),
-              type:  'color-preview',
-              value: this.setting(`${PREFIX}.backgroundColor`, primaryColor)(),
-            })}
+            <ResettableColorField
+              stream={this.setting(`${PREFIX}.themeColor`, primaryColor)}
+              label={tr('general.theme_color_label')}
+              help={tr('general.theme_color_help')}
+              placeholder={primaryColor}
+            />
+            <ResettableColorField
+              stream={this.setting(`${PREFIX}.backgroundColor`, primaryColor)}
+              label={tr('general.background_color_label')}
+              help={tr('general.background_color_help')}
+              placeholder={primaryColor}
+            />
             {this.buildSettingComponent({
               setting: `${PREFIX}.useLogoBackground`,
               label: tr('general.use_logo_background_label'),
@@ -120,13 +119,12 @@ export default class PWAPage extends ExtensionPage {
               type:  'bool',
             })}
             {isOn(this.setting(`${PREFIX}.useLogoBackground`)()) &&
-              this.buildSettingComponent({
-                setting: `${PREFIX}.logoBackgroundColor`,
-                label: tr('general.logo_background_color_label'),
-                help:  tr('general.logo_background_color_help'),
-                type:  'color-preview',
-                value: this.setting(`${PREFIX}.logoBackgroundColor`, secondaryColor)(),
-              })
+              <ResettableColorField
+                stream={this.setting(`${PREFIX}.logoBackgroundColor`, secondaryColor)}
+                label={tr('general.logo_background_color_label')}
+                help={tr('general.logo_background_color_help')}
+                placeholder={secondaryColor}
+              />
             }
           </div>
 
