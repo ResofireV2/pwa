@@ -1,2 +1,280 @@
 // resofire/pwa — admin styles
-// Admin panel styles will be added in Stage 2.
+
+@primary:  var(--primary-color);
+@muted:    var(--muted-color);
+@border:   var(--control-bg-shaded);
+@surface:  var(--control-bg);
+@body-bg:  var(--body-bg);
+@text:     var(--text-color);
+
+// ── Page wrapper ──────────────────────────────────────────────────────────────
+
+.PWAPage {
+  padding: 24px;
+}
+
+// ── Tab bar ───────────────────────────────────────────────────────────────────
+
+.PWAPage-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid @border;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.PWAPage-tab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  padding: 10px 20px;
+  cursor: pointer;
+  color: @muted;
+  font-size: 0.97em;
+  font-weight: 500;
+  transition: color 0.12s;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  i { font-size: 13px; }
+
+  &:hover { color: @primary; }
+
+  &.is-active {
+    color: @primary;
+    border-bottom-color: @primary;
+    font-weight: 600;
+  }
+
+  .PWAPage-tab-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 9px;
+    background: var(--control-danger-bg);
+    color: var(--control-danger-color);
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+  }
+}
+
+// ── Tab content ───────────────────────────────────────────────────────────────
+
+.PWAPage-content {
+  .Form-group { max-width: 500px; }
+
+  .Form-controls {
+    max-width: none;
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid @border;
+  }
+}
+
+// ── Two-column layout (settings + preview) ────────────────────────────────────
+
+.PWAPage-general {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+
+  @media (max-width: 768px) { flex-direction: column; }
+}
+
+.PWAPage-general-settings {
+  flex: 1;
+  min-width: 0;
+  .Form-group { max-width: 400px; }
+}
+
+.PWAPage-general-preview {
+  width: 220px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 80px;
+}
+
+// ── Splash preview ────────────────────────────────────────────────────────────
+
+.SplashPreview {
+  background: @surface;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.SplashPreview-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: @muted;
+  margin: 0 0 12px;
+}
+
+.SplashPreview-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 14px;
+  background: @body-bg;
+  border-radius: 6px;
+  padding: 3px;
+}
+
+.SplashPreview-tab {
+  flex: 1;
+  padding: 4px 8px;
+  font-size: 11px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background: transparent;
+  color: @muted;
+  font-weight: 500;
+  transition: background 0.1s, color 0.1s;
+  &.is-active { background: @surface; color: @text; }
+}
+
+.SplashPreview-phone { width: 140px; margin: 0 auto; }
+
+.SplashPreview-frame {
+  border: 2px solid @border;
+  border-radius: 22px;
+  overflow: hidden;
+  background: #111;
+}
+
+.SplashPreview-notch {
+  width: 48px;
+  height: 12px;
+  background: #111;
+  border-radius: 0 0 8px 8px;
+  margin: 0 auto;
+}
+
+.SplashPreview-statusbar { height: 16px; transition: background-color 0.25s; }
+
+.SplashPreview-screen {
+  height: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.25s;
+}
+
+.SplashPreview-logo {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  flex-shrink: 0;
+  transition: background-color 0.25s;
+  i { font-size: 24px; }
+}
+
+.SplashPreview-name {
+  font-size: 11px;
+  font-weight: 500;
+  text-align: center;
+  padding: 0 8px;
+  transition: color 0.25s;
+}
+
+.SplashPreview-homebar {
+  height: 16px;
+  background: #111;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.SplashPreview-homebar-pill {
+  width: 40px;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 2px;
+}
+
+.SplashPreview-homeicon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 60px;
+  margin: 24px auto;
+}
+
+.SplashPreview-homeicon-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.25s;
+  i { font-size: 24px; }
+}
+
+.SplashPreview-homeicon-label { font-size: 10px; color: @muted; text-align: center; }
+
+.SplashPreview-hint { font-size: 11px; color: @muted; text-align: center; margin-top: 10px; }
+
+.SplashPreview-contrast {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  font-size: 11px;
+  color: @muted;
+}
+
+.SplashPreview-contrast-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+// ── Status tab ────────────────────────────────────────────────────────────────
+
+.PWAPage-status-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 600px;
+  margin-bottom: 20px;
+}
+
+.PWAPage-status-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 6px;
+  border: 1px solid @border;
+  background: @body-bg;
+
+  &.is-ok   { border-color: var(--control-success-bg);  background: var(--control-success-bg); }
+  &.is-warn { border-color: var(--control-warning-bg); background: var(--control-warning-bg); }
+  &.is-err  { border-color: var(--control-danger-bg);  background: var(--control-danger-bg); }
+}
+
+.PWAPage-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 4px;
+  .is-ok &   { background: var(--enabled-color); }
+  .is-warn & { background: var(--control-warning-color); }
+  .is-err &  { background: var(--disabled-color); }
+}
+
+.PWAPage-status-text { flex: 1; }
+.PWAPage-status-title { font-size: 13px; font-weight: 600; color: @text; margin-bottom: 2px; }
+.PWAPage-status-body  { font-size: 12px; color: @muted; line-height: 1.5; }

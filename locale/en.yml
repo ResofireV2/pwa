@@ -1,6 +1,128 @@
 resofire-pwa:
   admin:
-    placeholder: "PWA settings will appear here. Full admin panel coming in Stage 2."
+    tabs:
+      general: General
+      icons: Icons
+      android: Android
+      apple: Apple
+      push: Push notifications
+      status: Status
+
+    general:
+      identity_heading: App identity
+      long_name_label: App name
+      long_name_help: "Full name shown on the splash screen and install prompt. Defaults to your forum title if left empty."
+      short_name_label: Short name
+      short_name_help: "Truncated label shown under the home screen icon. Keep under 12 characters."
+      start_url_label: Start URL
+      start_url_help: "The page opened when the app is launched. Use / for the forum home."
+
+      appearance_heading: Appearance
+      theme_color_label: Theme color
+      theme_color_help: "Controls browser chrome color on Android. Defaults to your forum primary color if left empty."
+      background_color_label: Background color
+      background_color_help: "Fills the splash screen behind your logo."
+      use_logo_background_label: Use a separate logo background
+      use_logo_background_help: "Adds a rounded square behind the icon on the splash screen."
+      logo_background_color_label: Logo background color
+      logo_background_color_help: "Color of the rounded square behind your icon."
+
+      behavior_heading: Behavior
+      force_portrait_label: Force portrait orientation
+      force_portrait_help: "Prevents the app from rotating to landscape mode."
+      window_controls_overlay_label: Window controls overlay
+      window_controls_overlay_help: "Extends your content into the title bar area on desktop. Experimental."
+
+    icons:
+      heading: Icon management
+      help: "Upload a single high-resolution source image and all required sizes will be generated automatically."
+      coming_soon: "Full icon upload and auto-generation will be available in a later update."
+
+    android:
+      banner_heading: Install banner
+      banner_enabled_label: Show install banner
+      banner_enabled_help: "A slim persistent banner below the header prompts users to install the app. Shown on first visit."
+      banner_text_label: Banner text
+      banner_text_help: "Text shown in the install banner."
+      banner_text_placeholder: Add to home screen
+      install_text_label: Install button label
+      install_text_help: "Label for the install action in the banner."
+      install_text_placeholder: Install
+
+      sheet_heading: Install sheet
+      sheet_enabled_label: Show install sheet on second visit
+      sheet_enabled_help: "A bottom sheet with feature highlights appears on the user's second visit, overlaying the banner."
+      sheet_delay_label: Sheet delay (milliseconds)
+      sheet_delay_help: "How long after page load before the sheet slides up."
+      sheet_feature_offline_label: Highlight offline support
+      sheet_feature_push_label: Highlight push notifications
+      sheet_feature_fullscreen_label: Highlight full-screen experience
+
+    apple:
+      prompt_heading: iOS / iPadOS prompt
+      prompt_enabled_label: Show iOS install prompt
+      prompt_enabled_help: "A sticky footer guides iPhone and iPad users through Safari's Add to Home Screen flow. Only shown in Safari — not when already installed."
+      prompt_text_label: Prompt text
+      prompt_text_help: "Use {appName} to insert your app name."
+      prompt_text_placeholder: "Install {appName} — tap Share then Add to Home Screen."
+      prompt_delay_label: Delay before showing
+      prompt_delay_help: "How long after page load before the prompt slides up."
+      delay_5s: 5 seconds
+      delay_10s: 10 seconds
+      delay_15s: 15 seconds
+      delay_30s: 30 seconds
+      delay_60s: 60 seconds
+
+      orientation_heading: Arrow direction
+      auto_detect_orientation_label: Auto-detect orientation (recommended)
+      auto_detect_orientation_help: "Automatically points the arrow toward Safari's share button based on device orientation."
+      pad_always_up_label: Always point up on iPad
+      pad_always_up_help: "Safari's share button is always in the top bar on iPad regardless of orientation."
+
+      statusbar_heading: Status bar
+      statusbar_label: Status bar style
+      statusbar_help: "Controls the iOS status bar appearance when the app is running in standalone mode."
+      statusbar_default: Default
+      statusbar_black: Black
+      statusbar_black_translucent: Black translucent
+
+    push:
+      vapid_heading: VAPID keys
+      vapid_help: "VAPID keys are used to authenticate push notifications. They are generated automatically on first use."
+      vapid_coming_soon: "VAPID key management will be available in a later update."
+
+      prompt_heading: First-run prompt
+      prompt_enabled_label: Show push notification prompt on first standalone launch
+      prompt_enabled_help: "Displays a modal asking the user to enable notifications the first time they open the installed app. Never shown in the browser."
+      prompt_title_label: Prompt title
+      prompt_title_help: "Heading shown in the push permission modal."
+      prompt_title_placeholder: Stay in the loop
+      prompt_body_label: Prompt body
+      prompt_body_help: "Description shown below the title."
+      prompt_body_placeholder: "Get notified when someone replies or mentions you."
+      prompt_delay_label: Delay before showing (milliseconds)
+      prompt_delay_help: "How long after the app opens before the prompt appears."
+
+      misc_heading: Advanced
+      max_subscriptions_label: Max push subscriptions per user
+      max_subscriptions_help: "Older subscriptions are removed when this limit is reached."
+      debug_label: Debug mode
+      debug_help: "Logs push notification activity to storage/logs. Disable in production."
+
+    status:
+      https_ok: HTTPS enabled
+      https_ok_body: "Your forum is served over HTTPS. PWAs require a secure context."
+      https_err: HTTPS not detected
+      https_err_body: "Your forum base URL does not use HTTPS. PWAs require a secure context to be installable."
+      name_ok: App name set
+      name_ok_body: "Your app name is configured and will appear on install prompts and the splash screen."
+      name_err: App name not set
+      name_err_body: "Set an app name on the General tab. The forum title will be used as a fallback."
+      icons_err: No icons uploaded
+      icons_err_body: "At least a 192x192 and 512x512 icon are required for the app to be installable. Icon upload is coming in a later update."
+      vapid_err: VAPID keys not configured
+      vapid_err_body: "VAPID keys are required for push notifications. They will be generated automatically in a later update."
+
   views:
     offline:
       title: "You're offline"

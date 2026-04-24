@@ -37,8 +37,8 @@
             "category": "feature",
             "icon": {
                 "name": "fas fa-mobile-alt",
-                "backgroundColor": "#1a3a5c",
-                "color": "#ffffff"
+                "backgroundColor": "#69c6b9",
+                "color": "#1A2744"
             }
         }
     },

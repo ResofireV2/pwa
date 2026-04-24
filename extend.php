@@ -80,13 +80,22 @@ return [
         ->default('resofire-pwa.startUrl', '/')
         ->default('resofire-pwa.statusBarStyle', 'default')
         ->default('resofire-pwa.iosPromptEnabled', true)
+        ->default('resofire-pwa.iosPromptText', '')
         ->default('resofire-pwa.iosPromptDelay', 10000)
+        ->default('resofire-pwa.iosAutoDetectOrientation', true)
+        ->default('resofire-pwa.iosPadAlwaysUp', true)
         ->default('resofire-pwa.androidBannerEnabled', true)
+        ->default('resofire-pwa.androidBannerText', '')
+        ->default('resofire-pwa.androidInstallText', '')
         ->default('resofire-pwa.androidSheetEnabled', true)
         ->default('resofire-pwa.androidSheetDelay', 1500)
+        ->default('resofire-pwa.androidSheetFeatureOffline', true)
+        ->default('resofire-pwa.androidSheetFeaturePush', true)
+        ->default('resofire-pwa.androidSheetFeatureFullscreen', true)
         ->default('resofire-pwa.pushPromptEnabled', true)
         ->default('resofire-pwa.pushPromptTitle', '')
         ->default('resofire-pwa.pushPromptBody', '')
         ->default('resofire-pwa.pushPromptDelay', 2000)
-        ->default('resofire-pwa.userMaxSubscriptions', 20),
+        ->default('resofire-pwa.userMaxSubscriptions', 20)
+        ->default('resofire-pwa.debugMode', false),
 ];
