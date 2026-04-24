@@ -111,6 +111,22 @@ trait PWATrait
             $manifest['display_override'] = ['window-controls-overlay'];
         }
 
+        // App shortcuts — appear in the long-press menu on Android and Windows.
+        $icon96Path = $settings->get('resofire-pwa.icon_96_path');
+        if ($icon96Path) {
+            /** @var \Illuminate\Contracts\Filesystem\Cloud $disk */
+            $disk = resolve(Factory::class)->disk('flarum-assets');
+            $manifest['shortcuts'] = [
+                [
+                    'name'  => $settings->get('forum_title', ''),
+                    'url'   => $basePath,
+                    'icons' => [
+                        ['src' => $disk->url($icon96Path), 'sizes' => '96x96', 'type' => 'image/png'],
+                    ],
+                ],
+            ];
+        }
+
         return $manifest;
     }
 }
