@@ -362,14 +362,51 @@ export default class PWAPage extends ExtensionPage {
 
   // ── Push Notifications ───────────────────────────────────────────────────────
 
+  private vapidGenerating = false;
+  private vapidError: string | null = null;
+
   private renderPush(): Mithril.Children {
-    const promptOn = this.setting(`${PREFIX}.pushPromptEnabled`)() === '1';
+    const promptOn     = this.setting(`${PREFIX}.pushPromptEnabled`)() === '1';
+    const hasVapid     = !!(app.data.settings[`${PREFIX}.vapid.public`]);
 
     return (
       <div>
         <FieldSet label={tr('push.vapid_heading')}>
           <p className="helpText">{tr('push.vapid_help')}</p>
-          <p className="helpText">{tr('push.vapid_coming_soon')}</p>
+
+          {hasVapid ? (
+            <div className="PWA-vapid-status">
+              <i className="fas fa-check-circle" style="color: var(--enabled-color); margin-right: 6px;" />
+              {tr('push.vapid_configured')}
+            </div>
+          ) : (
+            <p className="helpText" style="color: var(--control-danger-color);">
+              {tr('push.vapid_not_configured')}
+            </p>
+          )}
+
+          {this.vapidError && (
+            <p className="helpText" style="color: var(--control-danger-color); margin-top: 8px;">
+              {this.vapidError}
+            </p>
+          )}
+
+          <div style="margin-top: 12px;">
+            <button
+              className={'Button' + (hasVapid ? ' Button--danger' : ' Button--primary')}
+              disabled={this.vapidGenerating}
+              onclick={this.generateVapidKeys.bind(this)}
+            >
+              {this.vapidGenerating
+                ? <><i className="fas fa-spinner fa-spin" style="margin-right: 6px;" />{tr('push.vapid_generating')}</>
+                : hasVapid ? tr('push.vapid_regenerate') : tr('push.vapid_generate')}
+            </button>
+            {hasVapid && (
+              <span className="helpText" style="display: inline-block; margin-left: 10px;">
+                {tr('push.vapid_regenerate_warning')}
+              </span>
+            )}
+          </div>
         </FieldSet>
 
         <FieldSet label={tr('push.prompt_heading')}>
@@ -421,6 +458,35 @@ export default class PWAPage extends ExtensionPage {
     );
   }
 
+  private generateVapidKeys(): void {
+    if (this.vapidGenerating) return;
+
+    const hasVapid = !!(app.data.settings[`${PREFIX}.vapid.public`]);
+
+    if (hasVapid) {
+      if (!confirm(tr('push.vapid_regenerate_confirm'))) return;
+    }
+
+    this.vapidGenerating = true;
+    this.vapidError = null;
+    m.redraw();
+
+    app.request<{ publicKey: string; subscriptionsDeleted: number }>({
+      method: 'POST',
+      url:    `${app.forum.attribute('apiUrl')}/resofire-pwa/vapid`,
+    })
+      .then((response) => {
+        app.data.settings[`${PREFIX}.vapid.public`] = response.publicKey;
+        this.vapidGenerating = false;
+        m.redraw();
+      })
+      .catch((e: any) => {
+        this.vapidError = e?.response?.json?.error ?? tr('push.vapid_generate_error');
+        this.vapidGenerating = false;
+        m.redraw();
+      });
+  }
+
   // ── Status ───────────────────────────────────────────────────────────────────
 
   private renderStatus(): Mithril.Children {
@@ -469,8 +535,13 @@ export default class PWAPage extends ExtensionPage {
         : { type: 'err', title: tr('status.icons_err'), body: tr('status.icons_err_body') }
     );
 
-    // VAPID keys — implemented in Stage 7.
-    checks.push({ type: 'err', title: tr('status.vapid_err'), body: tr('status.vapid_err_body') });
+    // VAPID keys — check real settings key.
+    const hasVapid = !!(app.data.settings[`${PREFIX}.vapid.public`]);
+    checks.push(
+      hasVapid
+        ? { type: 'ok',  title: tr('status.vapid_ok'),  body: tr('status.vapid_ok_body')  }
+        : { type: 'err', title: tr('status.vapid_err'), body: tr('status.vapid_err_body') }
+    );
 
     return checks;
   }

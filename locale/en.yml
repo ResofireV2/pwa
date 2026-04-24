@@ -97,8 +97,15 @@ resofire-pwa:
 
     push:
       vapid_heading: VAPID keys
-      vapid_help: "VAPID keys are used to authenticate push notifications. They are generated automatically on first use."
-      vapid_coming_soon: "VAPID key management will be available in a later update."
+      vapid_help: "VAPID keys authenticate your push notifications. Generate them once — regenerating invalidates all existing subscriptions."
+      vapid_configured: "VAPID keys are configured and ready."
+      vapid_not_configured: "VAPID keys have not been generated yet. Push notifications will not work until keys are generated."
+      vapid_generate: Generate VAPID keys
+      vapid_regenerate: Regenerate VAPID keys
+      vapid_generating: Generating…
+      vapid_regenerate_warning: "Regenerating invalidates all existing subscriptions."
+      vapid_regenerate_confirm: "Regenerate VAPID keys? All existing push subscriptions will be deleted and users will need to re-subscribe."
+      vapid_generate_error: "Failed to generate VAPID keys. Check your server logs."
 
       prompt_heading: First-run prompt
       prompt_enabled_label: Show push notification prompt on first standalone launch
@@ -131,8 +138,10 @@ resofire-pwa:
       icons_ok_body: "Required icons (192×192 and 180×180) are uploaded and ready."
       icons_err: No icons uploaded
       icons_err_body: "At least a 192x192 and 512x512 icon are required for the app to be installable. Icon upload is coming in a later update."
+      vapid_ok: Push notifications ready
+      vapid_ok_body: "VAPID keys are configured. Push notifications are active."
       vapid_err: VAPID keys not configured
-      vapid_err_body: "VAPID keys are required for push notifications. They will be generated automatically in a later update."
+      vapid_err_body: "Generate VAPID keys on the Push notifications tab to enable push notifications."
 
   views:
     offline:
@@ -163,3 +172,10 @@ resofire-pwa:
     apple:
       prompt_text: "Install {appName} — tap the Share button then \"Add to Home Screen\"."
       dismiss: Dismiss install prompt
+
+    push:
+      modal_title: Stay in the loop
+      modal_body: "Get notified when someone replies to your posts or mentions you."
+      allow: Enable notifications
+      decline: Not now
+      notification_column: Push

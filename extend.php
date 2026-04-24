@@ -14,12 +14,18 @@ namespace Resofire\PWA;
 use Flarum\Extend;
 use Flarum\Frontend\Document;
 use Flarum\Settings\SettingsRepositoryInterface;
+use Flarum\User\User;
 use Illuminate\Support\Arr;
 use Resofire\PWA\Api\Controller\DeleteIconsController;
+use Resofire\PWA\Api\Controller\DeletePushSubscriptionController;
+use Resofire\PWA\Api\Controller\GenerateVapidKeysController;
+use Resofire\PWA\Api\Controller\SavePushSubscriptionController;
 use Resofire\PWA\Api\Controller\UploadIconController;
 use Resofire\PWA\Forum\Controller\OfflineController;
 use Resofire\PWA\Forum\Controller\ServiceWorkerController;
 use Resofire\PWA\Forum\Controller\WebManifestController;
+use Resofire\PWA\PushNotificationDriver;
+use Resofire\PWA\PushSubscription;
 
 $metaClosure = function (Document $document) {
     $forumApiDocument = $document->getForumApiDocument();
@@ -39,8 +45,11 @@ return [
     // API routes
     // -------------------------------------------------------------------------
     (new Extend\Routes('api'))
-        ->post('/resofire-pwa/icons', 'resofire-pwa.icons.upload', UploadIconController::class)
-        ->delete('/resofire-pwa/icons', 'resofire-pwa.icons.delete', DeleteIconsController::class),
+        ->post('/resofire-pwa/icons',  'resofire-pwa.icons.upload',  UploadIconController::class)
+        ->delete('/resofire-pwa/icons', 'resofire-pwa.icons.delete', DeleteIconsController::class)
+        ->post('/resofire-pwa/push',   'resofire-pwa.push.save',     SavePushSubscriptionController::class)
+        ->delete('/resofire-pwa/push', 'resofire-pwa.push.delete',   DeletePushSubscriptionController::class)
+        ->post('/resofire-pwa/vapid',  'resofire-pwa.vapid.generate', GenerateVapidKeysController::class),
 
     // -------------------------------------------------------------------------
     // Forum routes
@@ -62,6 +71,18 @@ return [
         ->js(__DIR__ . '/js/dist/admin.js')
         ->css(__DIR__ . '/less/admin.less')
         ->content($metaClosure),
+
+    // -------------------------------------------------------------------------
+    // User model relationship
+    // -------------------------------------------------------------------------
+    (new Extend\Model(User::class))
+        ->hasMany('pushSubscriptions', PushSubscription::class, 'user_id'),
+
+    // -------------------------------------------------------------------------
+    // Push notification driver
+    // -------------------------------------------------------------------------
+    (new Extend\Notification())
+        ->driver('push', PushNotificationDriver::class),
 
     // -------------------------------------------------------------------------
     // Translations
@@ -121,5 +142,7 @@ return [
         ->serializeToForum('resofire-pwa.iosPromptText',              'resofire-pwa.iosPromptText')
         ->serializeToForum('resofire-pwa.iosPromptDelay',             'resofire-pwa.iosPromptDelay',             'intval')
         ->serializeToForum('resofire-pwa.iosAutoDetectOrientation',   'resofire-pwa.iosAutoDetectOrientation',   'boolval')
-        ->serializeToForum('resofire-pwa.iosPadAlwaysUp',             'resofire-pwa.iosPadAlwaysUp',             'boolval'),
+        ->serializeToForum('resofire-pwa.iosPadAlwaysUp',             'resofire-pwa.iosPadAlwaysUp',             'boolval')
+        // Serialize VAPID public key so the forum JS can subscribe to push.
+        ->serializeToForum('resofire-pwa.vapidPublicKey', 'resofire-pwa.vapid.public'),
 ];

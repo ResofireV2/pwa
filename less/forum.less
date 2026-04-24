@@ -308,3 +308,91 @@
     border-width: 9px;
   }
 }
+
+// ── Push permission modal ─────────────────────────────────────────────────────
+
+.PWA-push-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 1002;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.PWA-push-modal {
+  background: @body-bg;
+  border-radius: 16px;
+  padding: 28px 24px;
+  max-width: 380px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 8px 32px @shadow;
+}
+
+.PWA-push-modal-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  background: @primary;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+
+  i {
+    font-size: 28px;
+    color: #fff;
+  }
+}
+
+.PWA-push-modal-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: @text;
+  margin: 0 0 10px;
+}
+
+.PWA-push-modal-body {
+  font-size: 14px;
+  color: @muted;
+  line-height: 1.6;
+  margin: 0 0 24px;
+}
+
+.PWA-push-modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.PWA-push-btn-allow {
+  width: 100%;
+  padding: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  justify-content: center;
+}
+
+.PWA-push-btn-decline {
+  width: 100%;
+  padding: 12px;
+  font-size: 14px;
+  color: @muted;
+  background: transparent;
+  border-color: transparent;
+  justify-content: center;
+
+  &:hover { background: @surface; }
+}
+
+// ── VAPID status (admin push tab) ─────────────────────────────────────────────
+
+.PWA-vapid-status {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--enabled-color);
+  margin-bottom: 10px;
+}

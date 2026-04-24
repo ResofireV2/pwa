@@ -2,12 +2,14 @@ import app from 'flarum/forum/app';
 import { extend } from 'flarum/common/extend';
 import Page from 'flarum/common/components/Page';
 import Notices from 'flarum/forum/components/Notices';
+import NotificationGrid from 'flarum/forum/components/NotificationGrid';
 import { openDB } from 'idb';
 import type ItemList from 'flarum/common/utils/ItemList';
 import type Mithril from 'mithril';
 import InstallBanner from './components/InstallBanner';
 import InstallSheet from './components/InstallSheet';
 import ApplePrompt from './components/ApplePrompt';
+import PushModal, { subscribeUserToPush } from './components/PushModal';
 import {
   isStandalone,
   isIOS,
@@ -23,37 +25,49 @@ const DB_NAME    = 'keyval-store';
 const DB_VERSION = 1;
 const STORE_NAME = 'keyval';
 
-// Captured beforeinstallprompt event — holds the deferred install prompt.
+const PUSH_PROMPTED_KEY = 'pwa.push.prompted';
+
+// Captured beforeinstallprompt event.
 let deferredPrompt: any = null;
 
-// Whether the banner/sheet should be showing right now.
+// Banner/sheet visibility.
 let showBanner = false;
 let showSheet  = false;
 
 app.initializers.add('resofire-pwa', () => {
 
-  // ── Capture the browser's install prompt (Android Chrome/Edge only) ──────
+  // ── beforeinstallprompt ──────────────────────────────────────────────────
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
-    // Re-evaluate visibility now that we have a prompt.
     evaluatePrompts();
     m.redraw();
   });
 
-  // ── Extend Page.oninit for SW registration and first-visit tracking ──────
+  // ── Page lifecycle ───────────────────────────────────────────────────────
   extend(Page.prototype, 'oninit', function () {
     const basePath = (app.forum.attribute<string>('basePath') || '').replace(/\/$/, '');
     registerServiceWorker(basePath);
     evaluatePrompts();
+
+    // Re-subscribe to push if permission was previously granted.
+    if (app.session.user && 'Notification' in window && Notification.permission === 'granted') {
+      if (app.forum.attribute<string>('resofire-pwa.vapidPublicKey')) {
+        subscribeUserToPush().catch(() => {});
+      }
+    }
+
+    // Show push modal on first standalone launch.
+    if (isStandalone()) {
+      maybeShowPushModal();
+    }
   });
 
-  // ── Track page visits for the offline page recent list ──────────────────
   extend(Page.prototype, 'oncreate', function () {
     notifyPageVisit();
   });
 
-  // ── Inject install banner into Notices ───────────────────────────────────
+  // ── Install banner in Notices ────────────────────────────────────────────
   extend(Notices.prototype, 'items', function (items: ItemList<Mithril.Children>) {
     if (!showBanner) return;
 
@@ -64,23 +78,73 @@ app.initializers.add('resofire-pwa', () => {
         onInstall={onInstallAccepted}
         onDismiss={onBannerDismissed}
       />,
-      -100  // low priority = renders below other notices
+      -100
     );
+  });
+
+  // ── Push notification column in NotificationGrid ─────────────────────────
+  extend(NotificationGrid.prototype, 'notificationMethods', function (items: ItemList<any>) {
+    if (!app.forum.attribute<string>('resofire-pwa.vapidPublicKey')) return;
+
+    items.add('push', {
+      name:  'push',
+      icon:  'fas fa-mobile-alt',
+      label: app.translator.trans('resofire-pwa.forum.push.notification_column'),
+    });
   });
 
 });
 
+// ── Push modal ────────────────────────────────────────────────────────────────
+
+function isPushPrompted(): boolean {
+  try { return localStorage.getItem(PUSH_PROMPTED_KEY) === '1'; } catch { return false; }
+}
+
+function markPushPrompted(): void {
+  try { localStorage.setItem(PUSH_PROMPTED_KEY, '1'); } catch {}
+}
+
+function maybeShowPushModal(): void {
+  if (!app.session.user) return;
+  if (isPushPrompted()) return;
+  if (!app.forum.attribute<string>('resofire-pwa.vapidPublicKey')) return;
+  if (!app.forum.attribute<boolean>('resofire-pwa.pushPromptEnabled')) return;
+  if (!('Notification' in window)) return;
+  if (Notification.permission !== 'default') return;
+
+  const delay = app.forum.attribute<number>('resofire-pwa.pushPromptDelay') ?? 2000;
+
+  setTimeout(() => {
+    if (!document.getElementById('pwa-push-modal')) {
+      const container = document.createElement('div');
+      container.id = 'pwa-push-modal';
+      document.body.appendChild(container);
+
+      const unmount = () => {
+        m.mount(container, null);
+        container.remove();
+      };
+
+      m.mount(container, {
+        view: () => m(PushModal, {
+          onAccept:  () => { markPushPrompted(); unmount(); m.redraw(); },
+          onDecline: () => { markPushPrompted(); unmount(); },
+        }),
+      });
+    }
+  }, delay);
+}
+
 // ── Prompt evaluation ─────────────────────────────────────────────────────────
 
 function evaluatePrompts(): void {
-  // Suppress everything when already installed or running standalone.
   if (isStandalone() || isInstalled()) {
     showBanner = false;
     showSheet  = false;
     return;
   }
 
-  // iOS: handle separately with the Apple prompt, not the banner/sheet.
   if (isIOS()) {
     if (isSafari() && !isBannerDismissed()) {
       mountApplePrompt();
@@ -88,7 +152,6 @@ function evaluatePrompts(): void {
     return;
   }
 
-  // Android / desktop: requires deferredPrompt to have fired.
   if (!deferredPrompt) return;
 
   const bannerEnabled = app.forum.attribute<boolean>('resofire-pwa.androidBannerEnabled') ?? true;
@@ -102,10 +165,8 @@ function evaluatePrompts(): void {
 
   if (!bannerEnabled) return;
 
-  // Banner shows from first visit onwards (until dismissed or installed).
   showBanner = true;
 
-  // Sheet shows on second visit, once.
   if (sheetEnabled && isSecondVisit()) {
     showSheet = true;
     mountInstallSheet();
@@ -129,7 +190,6 @@ function onBannerDismissed(): void {
 }
 
 function onSheetDismissed(): void {
-  // Sheet dismissed with "Not now" — banner persists.
   showSheet = false;
   m.redraw();
 }
@@ -146,10 +206,9 @@ function mountInstallSheet(): void {
   m.mount(container, {
     view: () => m(InstallSheet, {
       deferredPrompt,
-      onInstall:  onInstallAccepted,
-      onDismiss:  () => {
+      onInstall: onInstallAccepted,
+      onDismiss: () => {
         onSheetDismissed();
-        // Unmount and remove the container when done.
         m.mount(container, null);
         container.remove();
       },
@@ -158,7 +217,6 @@ function mountInstallSheet(): void {
 }
 
 function mountApplePrompt(): void {
-  // Only mount once.
   if (document.getElementById('pwa-apple-prompt')) return;
 
   const container = document.createElement('div');
