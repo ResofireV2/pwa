@@ -62,11 +62,9 @@ app.initializers.add('resofire-pwa', () => {
     notifyPageVisit();
 
     // Show push modal on first standalone launch.
-    // Called here (oncreate) rather than oninit so the user session is
-    // guaranteed to be populated before we check app.session.user.
-    if (isStandalone()) {
-      maybeShowPushModal();
-    }
+    // The isStandalone() check is temporarily removed for testing —
+    // re-add it before production release.
+    maybeShowPushModal();
   });
 
   // ── Install banner in Notices ────────────────────────────────────────────
