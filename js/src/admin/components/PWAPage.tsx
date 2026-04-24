@@ -68,43 +68,50 @@ export default class PWAPage extends ExtensionPage {
   // ── General ─────────────────────────────────────────────────────────────────
 
   private renderGeneral(): Mithril.Children {
-    return (
-      <div className="PWAPage-general">
-        <div className="PWAPage-general-settings">
-          <FieldSet label={tr('general.identity_heading')}>
-            {this.buildSettingComponent({
-              setting: `${PREFIX}.longName`,
-              label: tr('general.long_name_label'),
-              help:  tr('general.long_name_help'),
-              type:  'text',
-              placeholder: app.data.settings['forum_title'] || '',
-            })}
-            {this.buildSettingComponent({
-              setting: `${PREFIX}.shortName`,
-              label: tr('general.short_name_label'),
-              help:  tr('general.short_name_help'),
-              type:  'text',
-            })}
-            {this.buildSettingComponent({
-              setting: `${PREFIX}.startUrl`,
-              label: tr('general.start_url_label'),
-              help:  tr('general.start_url_help'),
-              type:  'text',
-            })}
-          </FieldSet>
+    const primaryColor   = app.forum.attribute<string>('themePrimaryColor')   || '';
+    const secondaryColor = app.forum.attribute<string>('themeSecondaryColor') || '';
 
-          <FieldSet label={tr('general.appearance_heading')}>
+    return (
+      <div>
+        <FieldSet label={tr('general.identity_heading')}>
+          {this.buildSettingComponent({
+            setting: `${PREFIX}.longName`,
+            label: tr('general.long_name_label'),
+            help:  tr('general.long_name_help'),
+            type:  'text',
+            placeholder: app.data.settings['forum_title'] || '',
+          })}
+          {this.buildSettingComponent({
+            setting: `${PREFIX}.shortName`,
+            label: tr('general.short_name_label'),
+            help:  tr('general.short_name_help'),
+            type:  'text',
+          })}
+          {this.buildSettingComponent({
+            setting: `${PREFIX}.startUrl`,
+            label: tr('general.start_url_label'),
+            help:  tr('general.start_url_help'),
+            type:  'text',
+          })}
+        </FieldSet>
+
+        <div className="PWAPage-appearance-card">
+          <div className="PWAPage-appearance-settings">
+            <div className="PWAPage-appearance-label">{tr('general.appearance_heading')}</div>
+
             {this.buildSettingComponent({
               setting: `${PREFIX}.themeColor`,
               label: tr('general.theme_color_label'),
               help:  tr('general.theme_color_help'),
               type:  'color-preview',
+              value: this.setting(`${PREFIX}.themeColor`, primaryColor)(),
             })}
             {this.buildSettingComponent({
               setting: `${PREFIX}.backgroundColor`,
               label: tr('general.background_color_label'),
               help:  tr('general.background_color_help'),
               type:  'color-preview',
+              value: this.setting(`${PREFIX}.backgroundColor`, primaryColor)(),
             })}
             {this.buildSettingComponent({
               setting: `${PREFIX}.useLogoBackground`,
@@ -118,34 +125,35 @@ export default class PWAPage extends ExtensionPage {
                 label: tr('general.logo_background_color_label'),
                 help:  tr('general.logo_background_color_help'),
                 type:  'color-preview',
+                value: this.setting(`${PREFIX}.logoBackgroundColor`, secondaryColor)(),
               })
             }
-          </FieldSet>
+          </div>
 
-          <FieldSet label={tr('general.behavior_heading')}>
-            {this.buildSettingComponent({
-              setting: `${PREFIX}.forcePortrait`,
-              label: tr('general.force_portrait_label'),
-              help:  tr('general.force_portrait_help'),
-              type:  'bool',
-            })}
-            {this.buildSettingComponent({
-              setting: `${PREFIX}.windowControlsOverlay`,
-              label: tr('general.window_controls_overlay_label'),
-              help:  tr('general.window_controls_overlay_help'),
-              type:  'bool',
-            })}
-          </FieldSet>
+          <div className="PWAPage-appearance-preview">
+            <SplashPreview
+              bgColor={this.setting(`${PREFIX}.backgroundColor`, primaryColor)}
+              logoBgEnabled={this.setting(`${PREFIX}.useLogoBackground`)}
+              logoBgColor={this.setting(`${PREFIX}.logoBackgroundColor`, secondaryColor)}
+              appName={this.setting(`${PREFIX}.longName`)}
+            />
+          </div>
         </div>
 
-        <div className="PWAPage-general-preview">
-          <SplashPreview
-            bgColor={this.setting(`${PREFIX}.backgroundColor`)}
-            logoBgEnabled={this.setting(`${PREFIX}.useLogoBackground`)}
-            logoBgColor={this.setting(`${PREFIX}.logoBackgroundColor`)}
-            appName={this.setting(`${PREFIX}.longName`)}
-          />
-        </div>
+        <FieldSet label={tr('general.behavior_heading')}>
+          {this.buildSettingComponent({
+            setting: `${PREFIX}.forcePortrait`,
+            label: tr('general.force_portrait_label'),
+            help:  tr('general.force_portrait_help'),
+            type:  'bool',
+          })}
+          {this.buildSettingComponent({
+            setting: `${PREFIX}.windowControlsOverlay`,
+            label: tr('general.window_controls_overlay_label'),
+            help:  tr('general.window_controls_overlay_help'),
+            type:  'bool',
+          })}
+        </FieldSet>
       </div>
     );
   }

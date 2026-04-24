@@ -26,7 +26,7 @@ export default class SplashPreview extends Component<ISplashPreviewAttrs> {
 
     return (
       <div className="SplashPreview">
-        <p className="SplashPreview-label">Live preview</p>
+        <p className="SplashPreview-label">{app.translator.trans('resofire-pwa.admin.general.preview_label') as string}</p>
 
         <div className="SplashPreview-tabs">
           <button

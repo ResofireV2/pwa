@@ -80,33 +80,59 @@
 
 // ── Two-column layout (settings + preview) ────────────────────────────────────
 
-.PWAPage-general {
-  display: flex;
-  gap: 32px;
-  align-items: flex-start;
+// ── Appearance card (settings + preview side by side) ────────────────────────
 
-  @media (max-width: 768px) { flex-direction: column; }
+.PWAPage-appearance-card {
+  display: flex;
+  gap: 0;
+  align-items: stretch;
+  border: 1px solid @border;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 20px;
+
+  @media (max-width: 900px) { flex-direction: column; }
 }
 
-.PWAPage-general-settings {
+.PWAPage-appearance-settings {
   flex: 1;
   min-width: 0;
-  .Form-group { max-width: 400px; }
+  padding: 20px;
+  border-right: 1px solid @border;
+
+  .Form-group { max-width: 380px; }
+
+  @media (max-width: 900px) {
+    border-right: none;
+    border-bottom: 1px solid @border;
+  }
 }
 
-.PWAPage-general-preview {
-  width: 220px;
+.PWAPage-appearance-label {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: @muted;
+  margin-bottom: 16px;
+}
+
+.PWAPage-appearance-preview {
+  width: 280px;
   flex-shrink: 0;
-  position: sticky;
-  top: 80px;
+  background: @surface;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+
+  @media (max-width: 900px) { width: 100%; }
 }
 
 // ── Splash preview ────────────────────────────────────────────────────────────
 
 .SplashPreview {
-  background: @surface;
-  border-radius: 8px;
-  padding: 16px;
+  width: 100%;
 }
 
 .SplashPreview-label {
@@ -141,7 +167,7 @@
   &.is-active { background: @surface; color: @text; }
 }
 
-.SplashPreview-phone { width: 200px; margin: 0 auto; }
+.SplashPreview-phone { width: 240px; margin: 0 auto; }
 
 .SplashPreview-frame {
   border: 2px solid @border;
@@ -161,7 +187,7 @@
 .SplashPreview-statusbar { height: 16px; transition: background-color 0.25s; }
 
 .SplashPreview-screen {
-  height: 290px;
+  height: 350px;
   display: flex;
   flex-direction: column;
   align-items: center;

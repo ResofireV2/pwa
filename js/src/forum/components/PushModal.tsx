@@ -59,6 +59,7 @@ export default class PushModal extends Component<IPushModalAttrs> {
 
       if (permission === 'granted') {
         await subscribeUserToPush();
+        await enableDefaultPushPreferences();
         this.attrs.onAccept();
       } else {
         this.attrs.onDecline();
@@ -128,4 +129,44 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
   const base64  = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
   const raw     = atob(base64);
   return Uint8Array.from([...raw].map((c) => c.charCodeAt(0)));
+}
+
+/**
+ * After granting push permission, automatically enable push for all notification
+ * types that the user already has enabled for alerts or email. This mirrors
+ * what the user has already opted into rather than defaulting everything on.
+ */
+async function enableDefaultPushPreferences(): Promise<void> {
+  const user = app.session.user;
+  if (!user) return;
+
+  const preferences = user.preferences() as Record<string, boolean>;
+  const updates: Record<string, boolean> = {};
+
+  Object.keys(preferences).forEach((key) => {
+    // Find keys like notify_{type}_alert or notify_{type}_email that are enabled
+    const match = key.match(/^notify_(.+)_(alert|email)$/);
+    if (match && preferences[key]) {
+      const pushKey = `notify_${match[1]}_push`;
+      // Only enable push if not already explicitly set
+      if (!(pushKey in preferences)) {
+        updates[pushKey] = true;
+      }
+    }
+  });
+
+  if (Object.keys(updates).length === 0) return;
+
+  try {
+    await app.request({
+      method: 'PATCH',
+      url:    `${app.forum.attribute('apiUrl')}/users/${user.id()}`,
+      body:   { data: { attributes: { preferences: updates } } },
+    });
+
+    // Update local preference cache
+    user.pushData({ attributes: { preferences: { ...preferences, ...updates } } });
+  } catch {
+    // Non-critical — push will still work, user just needs to set prefs manually
+  }
 }

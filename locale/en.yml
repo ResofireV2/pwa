@@ -14,18 +14,19 @@ resofire-pwa:
       long_name_help: "Full name shown on the splash screen and install prompt. Defaults to your forum title if left empty."
       short_name_label: Short name
       short_name_help: "Truncated label shown under the home screen icon. Keep under 12 characters."
+      preview_label: Live preview
       start_url_label: Start URL
       start_url_help: "The page opened when the app is launched. Use / for the forum home."
 
       appearance_heading: Appearance
       theme_color_label: Theme color
-      theme_color_help: "Controls browser chrome color on Android. Defaults to your forum primary color if left empty."
+      theme_color_help: "Controls browser chrome color on Android. Delete the value and save to reset to your forum's primary color."
       background_color_label: Background color
-      background_color_help: "Fills the splash screen behind your logo."
+      background_color_help: "Fills the splash screen behind your logo. Delete the value and save to reset to your forum's primary color."
       use_logo_background_label: Use a separate logo background
       use_logo_background_help: "Adds a rounded square behind the icon on the splash screen."
       logo_background_color_label: Logo background color
-      logo_background_color_help: "Color of the rounded square behind your icon."
+      logo_background_color_help: "Color of the rounded square behind your icon. Delete the value and save to reset to your forum's secondary color."
 
       behavior_heading: Behavior
       force_portrait_label: Force portrait orientation
