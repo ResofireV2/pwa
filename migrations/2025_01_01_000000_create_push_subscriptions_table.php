@@ -16,7 +16,10 @@ return Migration::createTableIfNotExists(
     'resofire_pwa_push_subscriptions',
     function (Blueprint $table) {
         $table->increments('id');
-        $table->string('endpoint')->unique();
+        // text instead of string — Web Push endpoints can exceed 255 chars,
+        // and a unique index on a utf8mb4 text column exceeds MySQL's 767-byte
+        // index prefix limit. Uniqueness is enforced at the application level.
+        $table->text('endpoint');
         $table->string('vapid_public_key');
         $table->string('keys')->nullable();
         $table->timestamp('expires_at')->nullable();

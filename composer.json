@@ -16,12 +16,12 @@
     },
     "require": {
         "php": "^8.3",
-        "flarum/core": "^2.0",
-        "minishlink/web-push": "^9.0.2",
-        "spomky-labs/base64url": "^2.0.4"
+        "flarum/core": "^2.0"
     },
     "suggest": {
-        "ext-gmp": "Improves VAPID signing performance for push notifications."
+        "ext-gmp": "Improves VAPID signing performance for push notifications.",
+        "minishlink/web-push": "Required for push notifications (added in a later stage).",
+        "spomky-labs/base64url": "Required for push notifications (added in a later stage)."
     },
     "autoload": {
         "psr-4": {
