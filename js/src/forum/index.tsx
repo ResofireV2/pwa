@@ -110,14 +110,25 @@ function markPushPrompted(): void {
 }
 
 function maybeShowPushModal(): void {
-  if (!app.session.user) return;
-  if (isPushPrompted()) return;
-  if (!app.forum.attribute<string>('resofire-pwa.vapidPublicKey')) return;
-  if (!app.forum.attribute<boolean>('resofire-pwa.pushPromptEnabled')) return;
-  if (!('Notification' in window)) return;
-  if (Notification.permission !== 'default') return;
+  console.log('[PWA Push] checking modal conditions:', {
+    user:            !!app.session.user,
+    prompted:        isPushPrompted(),
+    vapidKey:        !!app.forum.attribute<string>('resofire-pwa.vapidPublicKey'),
+    promptEnabled:   app.forum.attribute<boolean>('resofire-pwa.pushPromptEnabled'),
+    notificationApi: 'Notification' in window,
+    permission:      'Notification' in window ? Notification.permission : 'n/a',
+    isStandalone:    isStandalone(),
+  });
+
+  if (!app.session.user) { console.log('[PWA Push] blocked: no user'); return; }
+  if (isPushPrompted()) { console.log('[PWA Push] blocked: already prompted'); return; }
+  if (!app.forum.attribute<string>('resofire-pwa.vapidPublicKey')) { console.log('[PWA Push] blocked: no VAPID key'); return; }
+  if (!app.forum.attribute<boolean>('resofire-pwa.pushPromptEnabled')) { console.log('[PWA Push] blocked: prompt disabled'); return; }
+  if (!('Notification' in window)) { console.log('[PWA Push] blocked: no Notification API'); return; }
+  if (Notification.permission !== 'default') { console.log('[PWA Push] blocked: permission is', Notification.permission); return; }
 
   const delay = app.forum.attribute<number>('resofire-pwa.pushPromptDelay') ?? 2000;
+  console.log('[PWA Push] all conditions passed, showing modal in', delay, 'ms');
 
   setTimeout(() => {
     if (!document.getElementById('pwa-push-modal')) {
