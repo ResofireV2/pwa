@@ -1,0 +1,10 @@
+en:
+  resofire-pwa:
+    admin:
+      placeholder: "PWA settings will appear here. Full admin panel coming in Stage 2."
+    views:
+      offline:
+        title: "You're offline"
+        heading: "You're offline"
+        body: "No internet connection right now. Check your connection and try again."
+        retry: "Try again"
