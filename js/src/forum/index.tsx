@@ -56,15 +56,17 @@ app.initializers.add('resofire-pwa', () => {
         subscribeUserToPush().catch(() => {});
       }
     }
-
-    // Show push modal on first standalone launch.
-    if (isStandalone()) {
-      maybeShowPushModal();
-    }
   });
 
   extend(Page.prototype, 'oncreate', function () {
     notifyPageVisit();
+
+    // Show push modal on first standalone launch.
+    // Called here (oncreate) rather than oninit so the user session is
+    // guaranteed to be populated before we check app.session.user.
+    if (isStandalone()) {
+      maybeShowPushModal();
+    }
   });
 
   // ── Install banner in Notices ────────────────────────────────────────────
