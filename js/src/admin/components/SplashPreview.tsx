@@ -16,7 +16,8 @@ export default class SplashPreview extends Component<ISplashPreviewAttrs> {
 
   view(): Mithril.Children {
     const bg          = this.validColor(this.attrs.bgColor()) || '#1a3a5c';
-    const useLogoBg   = this.attrs.logoBgEnabled() === '1';
+    const v         = this.attrs.logoBgEnabled();
+    const useLogoBg = !!v && v !== '0';
     const logoBg      = useLogoBg ? (this.validColor(this.attrs.logoBgColor()) || bg) : bg;
     const appName     = this.attrs.appName() || 'My Community';
     const nameColor   = this.textColorFor(bg);
@@ -79,7 +80,7 @@ export default class SplashPreview extends Component<ISplashPreviewAttrs> {
             )}
 
             {this.mode === 'home' && (
-              <div style={{ backgroundColor: '#f0f0f0', height: '248px' }}>
+              <div style={{ backgroundColor: '#f0f0f0', height: '338px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <div className="SplashPreview-homeicon">
                   <div
                     className="SplashPreview-homeicon-icon"

@@ -9,6 +9,12 @@ const PREFIX = 'resofire-pwa';
 
 type Tab = 'general' | 'icons' | 'android' | 'apple' | 'push' | 'status';
 
+// Flarum's Switch component stores boolean true/false (not '1'/'0') before saving.
+// After saving, the DB returns '1'/'0' strings. Handle both.
+function isOn(value: any): boolean {
+  return !!value && value !== '0';
+}
+
 function tr(key: string): string {
   return app.translator.trans(`${PREFIX}.admin.${key}`) as string;
 }
@@ -106,7 +112,7 @@ export default class PWAPage extends ExtensionPage {
               help:  tr('general.use_logo_background_help'),
               type:  'bool',
             })}
-            {this.setting(`${PREFIX}.useLogoBackground`)() === '1' &&
+            {isOn(this.setting(`${PREFIX}.useLogoBackground`)()) &&
               this.buildSettingComponent({
                 setting: `${PREFIX}.logoBackgroundColor`,
                 label: tr('general.logo_background_color_label'),
@@ -228,8 +234,8 @@ export default class PWAPage extends ExtensionPage {
   // ── Android ──────────────────────────────────────────────────────────────────
 
   private renderAndroid(): Mithril.Children {
-    const bannerOn = this.setting(`${PREFIX}.androidBannerEnabled`)() === '1';
-    const sheetOn  = this.setting(`${PREFIX}.androidSheetEnabled`)()  === '1';
+    const bannerOn = isOn(this.setting(`${PREFIX}.androidBannerEnabled`)());
+    const sheetOn  = isOn(this.setting(`${PREFIX}.androidSheetEnabled`)());
 
     return (
       <div>
@@ -293,7 +299,7 @@ export default class PWAPage extends ExtensionPage {
   // ── Apple ────────────────────────────────────────────────────────────────────
 
   private renderApple(): Mithril.Children {
-    const promptOn = this.setting(`${PREFIX}.iosPromptEnabled`)() === '1';
+    const promptOn = isOn(this.setting(`${PREFIX}.iosPromptEnabled`)());
 
     return (
       <div>
@@ -366,7 +372,7 @@ export default class PWAPage extends ExtensionPage {
   private vapidError: string | null = null;
 
   private renderPush(): Mithril.Children {
-    const promptOn     = this.setting(`${PREFIX}.pushPromptEnabled`)() === '1';
+    const promptOn     = isOn(this.setting(`${PREFIX}.pushPromptEnabled`)());
     const hasVapid     = !!(app.data.settings[`${PREFIX}.vapid.public`]);
 
     return (

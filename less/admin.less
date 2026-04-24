@@ -141,7 +141,7 @@
   &.is-active { background: @surface; color: @text; }
 }
 
-.SplashPreview-phone { width: 140px; margin: 0 auto; }
+.SplashPreview-phone { width: 200px; margin: 0 auto; }
 
 .SplashPreview-frame {
   border: 2px solid @border;
@@ -161,7 +161,7 @@
 .SplashPreview-statusbar { height: 16px; transition: background-color 0.25s; }
 
 .SplashPreview-screen {
-  height: 200px;
+  height: 290px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -211,7 +211,7 @@
   align-items: center;
   gap: 6px;
   width: 60px;
-  margin: 24px auto;
+  margin: 0;
 }
 
 .SplashPreview-homeicon-icon {
@@ -259,9 +259,9 @@
   border: 1px solid @border;
   background: @body-bg;
 
-  &.is-ok   { border-color: var(--control-success-bg);  background: var(--control-success-bg); }
-  &.is-warn { border-color: var(--control-warning-bg); background: var(--control-warning-bg); }
-  &.is-err  { border-color: var(--control-danger-bg);  background: var(--control-danger-bg); }
+  &.is-ok   { border-color: var(--enabled-color); }
+  &.is-warn { border-color: var(--control-warning-color); }
+  &.is-err  { border-color: var(--disabled-color); }
 }
 
 .PWAPage-status-dot {
@@ -301,8 +301,8 @@
 
   &.is-filled {
     border-style: solid;
-    border-color: var(--control-success-bg);
-    background: var(--control-success-bg);
+    border-color: var(--enabled-color);
+    background: @body-bg;
   }
 }
 
