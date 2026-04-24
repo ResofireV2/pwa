@@ -33,7 +33,7 @@ async function dbSet(key, val) {
 // ── Cache names ───────────────────────────────────────────────────────────────
 
 const CACHE_ASSETS  = 'resofire-pwa-assets-v1';
-const CACHE_SHELL   = 'resofire-pwa-shell-v1';
+const CACHE_SHELL   = 'resofire-pwa-shell-v3';  // bumped — clears stale v1 entries on update
 const CACHE_OFFLINE = 'resofire-pwa-offline-v1';
 
 const OFFLINE_URL = 'offline';
@@ -151,15 +151,21 @@ self.addEventListener('fetch', function (event) {
     const basePath   = forumPayload.basePath   || '';
     const apiPath    = basePath + '/api/';
 
-    const isAsset     = assetsBase && request.url.startsWith(assetsBase);
-    const isApi       = url.pathname.startsWith(apiPath) || url.pathname === basePath + '/api';
+    const isAsset      = assetsBase && request.url.startsWith(assetsBase);
+    const isApi        = url.pathname.startsWith(apiPath) || url.pathname === basePath + '/api';
+    const isAdminPath  = url.pathname.startsWith(basePath + '/admin');
+    // Auth paths must always hit the network — caching login/logout/register
+    // would cause the UI to show stale session state after auth changes.
+    const isAuthPath   = ['/login', '/logout', '/register', '/confirm-email'].some(
+        function (p) { return url.pathname === basePath + p || url.pathname.startsWith(basePath + p + '/'); }
+    );
     const isNavigation = request.mode === 'navigate';
 
     if (isAsset) {
         // Cache-first for assets (JS, CSS, fonts, images).
         event.respondWith(cacheFirst(request, CACHE_ASSETS));
-    } else if (isApi) {
-        // Network-first for API — content must be fresh.
+    } else if (isApi || isAdminPath || isAuthPath) {
+        // Network-first for API, admin, and auth paths — never cache these.
         event.respondWith(networkFirst(request));
     } else if (isNavigation) {
         // Stale-while-revalidate for the forum shell.
@@ -205,7 +211,12 @@ async function staleWhileRevalidate(request, cacheName) {
     // Fire off a background revalidation regardless.
     const networkPromise = fetch(request).then(function (response) {
         if (response.ok) {
+            // Good response — update the cache.
             cache.put(request, response.clone());
+        } else {
+            // Error response — evict the stale cached entry so the next
+            // request goes to the network fresh rather than serving stale data.
+            cache.delete(request);
         }
         return response;
     }).catch(function () {
