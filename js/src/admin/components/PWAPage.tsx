@@ -102,6 +102,11 @@ export default class PWAPage extends ExtensionPage {
 
   private renderGeneral(): Mithril.Children {
     const primaryColor = app.forum.attribute<string>('themePrimaryColor') || '';
+    const assetsBase   = (app.forum.attribute('assetsBaseUrl') as string) || '';
+    const iconPath     = (app.data.settings['resofire-pwa.icon_192_path'] as string)
+                      || (app.data.settings['resofire-pwa.icon_180_path'] as string)
+                      || '';
+    const iconUrl      = iconPath ? `${assetsBase}/${iconPath}` : '';
 
     return (
       <div>
@@ -144,6 +149,8 @@ export default class PWAPage extends ExtensionPage {
           <SplashPreview
             bgColor={this.setting(`${PREFIX}.backgroundColor`, primaryColor)}
             appName={this.setting(`${PREFIX}.longName`)}
+            shortName={this.setting(`${PREFIX}.shortName`)}
+            iconUrl={iconUrl}
           />
         </FieldSet>
 

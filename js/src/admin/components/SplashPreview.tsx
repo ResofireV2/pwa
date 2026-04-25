@@ -5,6 +5,8 @@ import type Stream from 'flarum/common/utils/Stream';
 export interface ISplashPreviewAttrs extends ComponentAttrs {
   bgColor: Stream<string>;
   appName: Stream<string>;
+  shortName: Stream<string>;
+  iconUrl?: string;
 }
 
 type PreviewMode = 'splash' | 'home';
@@ -14,7 +16,9 @@ export default class SplashPreview extends Component<ISplashPreviewAttrs> {
 
   view(): Mithril.Children {
     const bg        = this.validColor(this.attrs.bgColor()) || '#1a3a5c';
-    const appName   = this.attrs.appName() || 'My Community';
+    const appName     = this.attrs.appName() || (app.data.settings['forum_title'] as string) || '';
+    const homeLabel   = this.attrs.shortName() || appName;
+    const iconUrl   = this.attrs.iconUrl || '';
     const nameColor = this.textColorFor(bg);
     const iconColor = this.textColorFor(bg);
     const contrast  = this.contrastRatio(bg, iconColor);
@@ -56,7 +60,10 @@ export default class SplashPreview extends Component<ISplashPreviewAttrs> {
                     className="SplashPreview-logo"
                     style={{ backgroundColor: 'transparent' }}
                   >
-                    <i className="fas fa-mobile-alt" style={{ color: iconColor }} />
+                    {iconUrl
+                      ? <img src={iconUrl} className="SplashPreview-icon-img" alt="" />
+                      : <i className="fas fa-mobile-alt" style={{ color: iconColor }} />
+                    }
                   </div>
                   <div
                     className="SplashPreview-name"
@@ -78,9 +85,12 @@ export default class SplashPreview extends Component<ISplashPreviewAttrs> {
                     className="SplashPreview-homeicon-icon"
                     style={{ backgroundColor: bg }}
                   >
-                    <i className="fas fa-mobile-alt" style={{ color: iconColor }} />
+                    {iconUrl
+                      ? <img src={iconUrl} className="SplashPreview-icon-img" alt="" />
+                      : <i className="fas fa-mobile-alt" style={{ color: iconColor }} />
+                    }
                   </div>
-                  <div className="SplashPreview-homeicon-label">{appName}</div>
+                  <div className="SplashPreview-homeicon-label">{homeLabel}</div>
                 </div>
               </div>
             )}
