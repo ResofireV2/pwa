@@ -91,7 +91,7 @@ class PushSender
         $typeAndId = $blueprint->getType() . strval($blueprint->getSubject()?->id ?? -1);
         $topic     = substr(str_pad(Base64Url::encode($typeAndId), 32, '0'), 0, 32);
 
-        $webPush = new WebPush($auth, ['topic' => $topic]);
+        $webPush = new WebPush($auth, ['urgency' => 'high', 'topic' => $topic]);
         $webPush->setReuseVAPIDHeaders(true);
         $webPush->setAutomaticPadding(false);
 
