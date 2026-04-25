@@ -330,7 +330,10 @@ export default class PWAPage extends ExtensionPage {
             label: tr('apple.prompt_text_label'),
             help:  tr('apple.prompt_text_help'),
             type:  'text',
-            placeholder: tr('apple.prompt_text_placeholder'),
+            placeholder: app.translator.trans(
+              'resofire-pwa.admin.apple.prompt_text_placeholder',
+              { appName: this.setting(`${PREFIX}.longName`)() || app.data.settings['forum_title'] || '' }
+            ) as string,
           })}
           {promptOn && this.buildSettingComponent({
             setting: `${PREFIX}.iosPromptDelay`,
@@ -465,15 +468,17 @@ export default class PWAPage extends ExtensionPage {
           <p className="helpText">{tr('push.badge_help')}</p>
 
           {badgeUrl && (
-            <div className="PWA-badge-preview">
-              <img src={badgeUrl} alt="Notification badge" className="PWA-badge-img" />
-              <button
-                className="Button Button--danger PWA-badge-delete"
-                onclick={this.deleteBadge.bind(this)}
-              >
-                <i className="fas fa-trash" style="margin-right: 6px;" />
-                {tr('push.badge_delete')}
-              </button>
+            <div className="Form-group">
+              <div className="PWA-badge-preview">
+                <img src={badgeUrl} alt="Notification badge" className="PWA-badge-img" />
+                <button
+                  className="Button Button--danger PWA-badge-delete"
+                  onclick={this.deleteBadge.bind(this)}
+                >
+                  <i className="fas fa-trash" style="margin-right: 6px;" />
+                  {tr('push.badge_delete')}
+                </button>
+              </div>
             </div>
           )}
 
