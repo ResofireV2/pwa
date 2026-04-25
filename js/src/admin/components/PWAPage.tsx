@@ -23,6 +23,38 @@ function tr(key: string): string {
 export default class PWAPage extends ExtensionPage {
   activeTab: Tab = 'general';
 
+  // Service worker registration state for the status tab.
+  // null = not yet checked, 'active' | 'installing' | 'none' = result.
+  swState: 'active' | 'installing' | 'none' | null = null;
+
+  oninit(vnode: Mithril.Vnode) {
+    super.oninit(vnode);
+    this.checkServiceWorker();
+  }
+
+  private checkServiceWorker(): void {
+    if (!('serviceWorker' in navigator)) {
+      this.swState = 'none';
+      return;
+    }
+
+    const basePath = (app.forum.attribute<string>('basePath') || '').replace(/\/$/, '') + '/';
+
+    navigator.serviceWorker.getRegistration(basePath).then((reg) => {
+      if (!reg) {
+        this.swState = 'none';
+      } else if (reg.active) {
+        this.swState = 'active';
+      } else {
+        this.swState = 'installing';
+      }
+      m.redraw();
+    }).catch(() => {
+      this.swState = 'none';
+      m.redraw();
+    });
+  }
+
   content(): Mithril.Children {
     const tabs: { key: Tab; icon: string; label: string }[] = [
       { key: 'general', icon: 'fas fa-cog',         label: tr('tabs.general')  },
@@ -56,7 +88,7 @@ export default class PWAPage extends ExtensionPage {
           {this.activeTab === 'push'    && this.renderPush()}
           {this.activeTab === 'status'  && this.renderStatus()}
 
-          {this.activeTab !== 'status' && (
+          {this.activeTab !== 'status' && this.activeTab !== 'icons' && (
             <div className="Form-group Form-controls">
               {this.submitButton()}
             </div>
@@ -554,6 +586,17 @@ export default class PWAPage extends ExtensionPage {
         ? { type: 'ok',  title: tr('status.vapid_ok'),  body: tr('status.vapid_ok_body')  }
         : { type: 'err', title: tr('status.vapid_err'), body: tr('status.vapid_err_body') }
     );
+
+    // Service worker registration — async check initiated in oninit.
+    if (this.swState === null) {
+      checks.push({ type: 'warn', title: tr('status.sw_checking'), body: tr('status.sw_checking_body') });
+    } else if (this.swState === 'active') {
+      checks.push({ type: 'ok',  title: tr('status.sw_ok'),  body: tr('status.sw_ok_body')  });
+    } else if (this.swState === 'installing') {
+      checks.push({ type: 'warn', title: tr('status.sw_warn'), body: tr('status.sw_warn_body') });
+    } else {
+      checks.push({ type: 'err', title: tr('status.sw_err'), body: tr('status.sw_err_body') });
+    }
 
     return checks;
   }

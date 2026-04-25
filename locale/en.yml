@@ -139,6 +139,15 @@ resofire-pwa:
       icons_ok_body: "Required icons (192×192 and 180×180) are uploaded and ready."
       icons_err: No icons uploaded
       icons_err_body: "At least a 192x192 and 512x512 icon are required for the app to be installable. Icon upload is coming in a later update."
+      sw_checking: Checking service worker…
+      sw_checking_body: "Verifying that the service worker is registered and active."
+      sw_ok: Service worker active
+      sw_ok_body: "The service worker is registered and serving requests."
+      sw_warn: Service worker installing
+      sw_warn_body: "The service worker is registered but not yet active. Reload the page to complete installation."
+      sw_err: Service worker not registered
+      sw_err_body: "The service worker is not registered. Visit the forum in a browser tab to trigger registration."
+
       vapid_ok: Push notifications ready
       vapid_ok_body: "VAPID keys are configured. Push notifications are active."
       vapid_err: VAPID keys not configured

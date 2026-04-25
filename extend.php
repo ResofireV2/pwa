@@ -32,12 +32,28 @@ $metaClosure = function (Document $document) {
     $basePath = rtrim(Arr::get($forumApiDocument, 'data.attributes.basePath'), '/');
 
     $settings = resolve(SettingsRepositoryInterface::class);
-    $appName = $settings->get('resofire-pwa.shortName', $settings->get('resofire-pwa.longName', $settings->get('forum_title')));
+    $appName  = $settings->get('resofire-pwa.shortName', $settings->get('resofire-pwa.longName', $settings->get('forum_title')));
+
+    // Status bar style — read from settings, not hardcoded
+    $statusBarStyle = $settings->get('resofire-pwa.statusBarStyle', 'default');
 
     $document->head[] = "<link rel='manifest' href='$basePath/webmanifest'>";
     $document->head[] = "<meta name='apple-mobile-web-app-capable' content='yes'>";
-    $document->head[] = "<meta id='apple-style' name='apple-mobile-web-app-status-bar-style' content='default'>";
+    $document->head[] = "<meta name='mobile-web-app-capable' content='yes'>";
+    $document->head[] = "<meta id='apple-style' name='apple-mobile-web-app-status-bar-style' content='" . htmlspecialchars($statusBarStyle, ENT_QUOTES, 'UTF-8') . "'>";
     $document->head[] = "<meta id='apple-title' name='apple-mobile-web-app-title' content='" . htmlspecialchars($appName, ENT_QUOTES, 'UTF-8') . "'>";
+
+    // Apple touch icon tags — Safari uses these for the home screen icon on iOS.
+    /** @var \Illuminate\Contracts\Filesystem\Cloud $assets */
+    $assets = resolve(\Illuminate\Contracts\Filesystem\Factory::class)->disk('flarum-assets');
+
+    foreach (\Resofire\PWA\IconSizes::ALL as $size) {
+        if ($path = $settings->get("resofire-pwa.icon_{$size}_path")) {
+            $url        = htmlspecialchars($assets->url($path), ENT_QUOTES, 'UTF-8');
+            $sizesAttr  = $size !== 48 ? " sizes='{$size}x{$size}'" : '';
+            $document->head[] = "<link rel='apple-touch-icon'{$sizesAttr} href='{$url}'>";
+        }
+    }
 };
 
 return [
