@@ -4,8 +4,6 @@ import type Stream from 'flarum/common/utils/Stream';
 
 export interface ISplashPreviewAttrs extends ComponentAttrs {
   bgColor: Stream<string>;
-  logoBgEnabled: Stream<string>;
-  logoBgColor: Stream<string>;
   appName: Stream<string>;
 }
 
@@ -15,14 +13,11 @@ export default class SplashPreview extends Component<ISplashPreviewAttrs> {
   mode: PreviewMode = 'splash';
 
   view(): Mithril.Children {
-    const bg          = this.validColor(this.attrs.bgColor()) || '#1a3a5c';
-    const v         = this.attrs.logoBgEnabled();
-    const useLogoBg = !!v && v !== '0';
-    const logoBg      = useLogoBg ? (this.validColor(this.attrs.logoBgColor()) || bg) : bg;
-    const appName     = this.attrs.appName() || 'My Community';
-    const nameColor   = this.textColorFor(bg);
-    const iconColor   = this.textColorFor(logoBg);
-    const contrast    = this.contrastRatio(bg, iconColor);
+    const bg        = this.validColor(this.attrs.bgColor()) || '#1a3a5c';
+    const appName   = this.attrs.appName() || 'My Community';
+    const nameColor = this.textColorFor(bg);
+    const iconColor = this.textColorFor(bg);
+    const contrast  = this.contrastRatio(bg, iconColor);
 
     return (
       <div className="SplashPreview">
@@ -59,10 +54,7 @@ export default class SplashPreview extends Component<ISplashPreviewAttrs> {
                 >
                   <div
                     className="SplashPreview-logo"
-                    style={{
-                      backgroundColor: useLogoBg && logoBg !== bg ? logoBg : 'transparent',
-                      borderRadius: useLogoBg && logoBg !== bg ? '12px' : '0',
-                    }}
+                    style={{ backgroundColor: 'transparent' }}
                   >
                     <i className="fas fa-mobile-alt" style={{ color: iconColor }} />
                   </div>

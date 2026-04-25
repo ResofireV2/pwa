@@ -16,10 +16,12 @@ use Flarum\Frontend\Document;
 use Flarum\Settings\SettingsRepositoryInterface;
 use Flarum\User\User;
 use Illuminate\Support\Arr;
+use Resofire\PWA\Api\Controller\DeleteBadgeController;
 use Resofire\PWA\Api\Controller\DeleteIconsController;
 use Resofire\PWA\Api\Controller\DeletePushSubscriptionController;
 use Resofire\PWA\Api\Controller\GenerateVapidKeysController;
 use Resofire\PWA\Api\Controller\SavePushSubscriptionController;
+use Resofire\PWA\Api\Controller\UploadBadgeController;
 use Resofire\PWA\Api\Controller\UploadIconController;
 use Resofire\PWA\Forum\Controller\OfflineController;
 use Resofire\PWA\Forum\Controller\ServiceWorkerController;
@@ -63,6 +65,8 @@ return [
     (new Extend\Routes('api'))
         ->post('/resofire-pwa/icons',  'resofire-pwa.icons.upload',  UploadIconController::class)
         ->delete('/resofire-pwa/icons', 'resofire-pwa.icons.delete', DeleteIconsController::class)
+        ->post('/resofire-pwa/badge',  'resofire-pwa.badge.upload',  UploadBadgeController::class)
+        ->delete('/resofire-pwa/badge', 'resofire-pwa.badge.delete', DeleteBadgeController::class)
         ->post('/resofire-pwa/push',   'resofire-pwa.push.save',     SavePushSubscriptionController::class)
         ->delete('/resofire-pwa/push', 'resofire-pwa.push.delete',   DeletePushSubscriptionController::class)
         ->post('/resofire-pwa/vapid',  'resofire-pwa.vapid.generate', GenerateVapidKeysController::class),
@@ -119,8 +123,6 @@ return [
         ->default('resofire-pwa.shortName', '')
         ->default('resofire-pwa.themeColor', '')
         ->default('resofire-pwa.backgroundColor', '')
-        ->default('resofire-pwa.logoBackgroundColor', '')
-        ->default('resofire-pwa.useLogoBackground', false)
         ->default('resofire-pwa.forcePortrait', false)
         ->default('resofire-pwa.windowControlsOverlay', false)
         ->default('resofire-pwa.startUrl', '/')
@@ -143,6 +145,8 @@ return [
         ->default('resofire-pwa.pushPromptBody', '')
         ->default('resofire-pwa.pushPromptDelay', 2000)
         ->default('resofire-pwa.userMaxSubscriptions', 20)
+        ->default('resofire-pwa.badge_path', '')
+        ->default('resofire-pwa.badge_url',  '')
         ->default('resofire-pwa.debugMode', false)
         // Serialize install prompt settings to the forum frontend.
         ->serializeToForum('resofire-pwa.appName',                    'resofire-pwa.longName')

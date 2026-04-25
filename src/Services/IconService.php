@@ -98,6 +98,44 @@ class IconService
     }
 
     /**
+     * Generate a 96×96 greyscale notification badge PNG from an upload.
+     *
+     * @return array{path: string, url: string}
+     */
+    public function generateBadge(UploadedFileInterface $file): array
+    {
+        $this->deleteBadge();
+
+        $sourcePath = $file->getStream()->getMetadata('uri');
+        $encoded    = $this->imageManager->read($sourcePath)
+            ->cover(96, 96)
+            ->greyscale()
+            ->toPng();
+
+        $filename = 'pwa-badge-' . Str::lower(Str::random(8)) . '.png';
+        $path     = "extensions/resofire-pwa/{$filename}";
+
+        $this->disk->put($path, $encoded);
+        $url = $this->disk->url($path);
+        $this->settings->set('resofire-pwa.badge_path', $path);
+        $this->settings->set('resofire-pwa.badge_url',  $url);
+
+        return [
+            'path' => $path,
+            'url'  => $url,
+        ];
+    }
+
+    /**
+     * Delete the notification badge and clear its settings key.
+     */
+    public function deleteBadge(): void
+    {
+        $this->deleteExisting('resofire-pwa.badge_path');
+        $this->settings->set('resofire-pwa.badge_url', null);
+    }
+
+    /**
      * Delete all generated icons and clear their settings keys.
      *
      * @return string[] List of settings keys that were cleared.

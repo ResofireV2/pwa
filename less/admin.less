@@ -80,59 +80,14 @@
 
 // ── Two-column layout (settings + preview) ────────────────────────────────────
 
-// ── Appearance card (settings + preview side by side) ────────────────────────
 
-.PWAPage-appearance-card {
-  display: flex;
-  gap: 0;
-  align-items: stretch;
-  border: 1px solid @border;
-  border-radius: 8px;
-  overflow: hidden;
-  margin-bottom: 20px;
-
-  @media (max-width: 900px) { flex-direction: column; }
-}
-
-.PWAPage-appearance-settings {
-  flex: 1;
-  min-width: 0;
-  padding: 20px;
-  border-right: 1px solid @border;
-
-  .Form-group { max-width: 380px; }
-
-  @media (max-width: 900px) {
-    border-right: none;
-    border-bottom: 1px solid @border;
-  }
-}
-
-.PWAPage-appearance-label {
-  font-size: 13px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: @muted;
-  margin-bottom: 16px;
-}
-
-.PWAPage-appearance-preview {
-  width: 280px;
-  flex-shrink: 0;
-  background: @surface;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-
-  @media (max-width: 900px) { width: 100%; }
-}
 
 // ── Splash preview ────────────────────────────────────────────────────────────
 
 .SplashPreview {
-  width: 100%;
+  margin-top: 20px;
+  border-top: 1px solid @border;
+  padding-top: 16px;
 }
 
 .SplashPreview-label {
@@ -381,12 +336,21 @@
   align-items: center;
   gap: 8px;
   max-width: 280px;
+  position: relative;
 }
 
 .ResettableColorField-input {
   flex: 1;
   font-family: monospace;
   font-size: 13px;
+}
+
+.ResettableColorField-picker {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .ResettableColorField-swatch {
@@ -396,4 +360,34 @@
   border: 1px solid @border;
   flex-shrink: 0;
   display: inline-block;
+  cursor: pointer;
+
+  &:hover { border-color: @primary; }
+}
+
+// ── Push notification badge preview ──────────────────────────────────────────
+
+.PWA-badge-preview {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+  padding: 12px;
+  background: @body-bg;
+  border: 1px solid @border;
+  border-radius: 8px;
+  width: fit-content;
+}
+
+.PWA-badge-img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  border-radius: 4px;
+  background: repeating-conic-gradient(@muted-more-color 0% 25%, transparent 0% 50%) 0 0 / 8px 8px;
+}
+
+.PWA-badge-delete {
+  font-size: 12px;
+  padding: 6px 10px;
 }

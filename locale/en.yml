@@ -23,10 +23,6 @@ resofire-pwa:
       theme_color_help: "Controls browser chrome color on Android. Delete the value and save to reset to your forum's primary color."
       background_color_label: Background color
       background_color_help: "Fills the splash screen behind your logo. Delete the value and save to reset to your forum's primary color."
-      use_logo_background_label: Use a separate logo background
-      use_logo_background_help: "Adds a rounded square behind the icon on the splash screen."
-      logo_background_color_label: Logo background color
-      logo_background_color_help: "Color of the rounded square behind your icon. Delete the value and save to reset to your forum's secondary color."
 
       behavior_heading: Behavior
       force_portrait_label: Force portrait orientation
@@ -119,6 +115,14 @@ resofire-pwa:
       prompt_body_placeholder: "Get notified when someone replies or mentions you."
       prompt_delay_label: Delay before showing (milliseconds)
       prompt_delay_help: "How long after the app opens before the prompt appears."
+
+      badge_heading: Notification badge
+      badge_help: "Upload a monochrome PNG for the small badge icon shown on Android notifications. Use a transparent background and keep your logo within a circular safe zone — Android crops the badge to a circle. Simple shapes work best. The server converts it to greyscale automatically. Recommended size: 96×96px minimum."
+      badge_upload: Upload badge image
+      badge_replace: Replace badge image
+      badge_uploading: Uploading…
+      badge_delete: Delete badge
+      badge_upload_error: Badge upload failed. Please try again.
 
       misc_heading: Advanced
       max_subscriptions_label: Max push subscriptions per user

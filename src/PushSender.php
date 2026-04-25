@@ -134,8 +134,11 @@ class PushSender
             'link'    => $message->url(),
         ];
 
-        if ($faviconPath = $this->settings->get('favicon_path')) {
-            $payload['badge'] = $this->assetsFilesystem->url($faviconPath);
+        // Badge — use uploaded monochrome badge if available, fallback to favicon.
+        $badgePath = $this->settings->get('resofire-pwa.badge_path')
+            ?: $this->settings->get('favicon_path');
+        if ($badgePath) {
+            $payload['badge'] = $this->assetsFilesystem->url($badgePath);
         }
 
         // Use the largest non-maskable PWA icon as the notification icon.

@@ -101,8 +101,7 @@ export default class PWAPage extends ExtensionPage {
   // ── General ─────────────────────────────────────────────────────────────────
 
   private renderGeneral(): Mithril.Children {
-    const primaryColor   = app.forum.attribute<string>('themePrimaryColor')   || '';
-    const secondaryColor = app.forum.attribute<string>('themeSecondaryColor') || '';
+    const primaryColor = app.forum.attribute<string>('themePrimaryColor') || '';
 
     return (
       <div>
@@ -128,47 +127,25 @@ export default class PWAPage extends ExtensionPage {
           })}
         </FieldSet>
 
-        <div className="PWAPage-appearance-card">
-          <div className="PWAPage-appearance-settings">
-            <div className="PWAPage-appearance-label">{tr('general.appearance_heading')}</div>
+        <FieldSet label={tr('general.appearance_heading')}>
+          <ResettableColorField
+            stream={this.setting(`${PREFIX}.themeColor`, primaryColor)}
+            label={tr('general.theme_color_label')}
+            help={tr('general.theme_color_help')}
+            placeholder={primaryColor}
+          />
+          <ResettableColorField
+            stream={this.setting(`${PREFIX}.backgroundColor`, primaryColor)}
+            label={tr('general.background_color_label')}
+            help={tr('general.background_color_help')}
+            placeholder={primaryColor}
+          />
 
-            <ResettableColorField
-              stream={this.setting(`${PREFIX}.themeColor`, primaryColor)}
-              label={tr('general.theme_color_label')}
-              help={tr('general.theme_color_help')}
-              placeholder={primaryColor}
-            />
-            <ResettableColorField
-              stream={this.setting(`${PREFIX}.backgroundColor`, primaryColor)}
-              label={tr('general.background_color_label')}
-              help={tr('general.background_color_help')}
-              placeholder={primaryColor}
-            />
-            {this.buildSettingComponent({
-              setting: `${PREFIX}.useLogoBackground`,
-              label: tr('general.use_logo_background_label'),
-              help:  tr('general.use_logo_background_help'),
-              type:  'bool',
-            })}
-            {isOn(this.setting(`${PREFIX}.useLogoBackground`)()) &&
-              <ResettableColorField
-                stream={this.setting(`${PREFIX}.logoBackgroundColor`, secondaryColor)}
-                label={tr('general.logo_background_color_label')}
-                help={tr('general.logo_background_color_help')}
-                placeholder={secondaryColor}
-              />
-            }
-          </div>
-
-          <div className="PWAPage-appearance-preview">
-            <SplashPreview
-              bgColor={this.setting(`${PREFIX}.backgroundColor`, primaryColor)}
-              logoBgEnabled={this.setting(`${PREFIX}.useLogoBackground`)}
-              logoBgColor={this.setting(`${PREFIX}.logoBackgroundColor`, secondaryColor)}
-              appName={this.setting(`${PREFIX}.longName`)}
-            />
-          </div>
-        </div>
+          <SplashPreview
+            bgColor={this.setting(`${PREFIX}.backgroundColor`, primaryColor)}
+            appName={this.setting(`${PREFIX}.longName`)}
+          />
+        </FieldSet>
 
         <FieldSet label={tr('general.behavior_heading')}>
           {this.buildSettingComponent({
@@ -406,12 +383,13 @@ export default class PWAPage extends ExtensionPage {
 
   // ── Push Notifications ───────────────────────────────────────────────────────
 
-  private vapidGenerating = false;
-  private vapidError: string | null = null;
+  private badgeUploading = false;
+  private badgeError: string | null = null;
 
   private renderPush(): Mithril.Children {
-    const promptOn     = isOn(this.setting(`${PREFIX}.pushPromptEnabled`)());
-    const hasVapid     = !!(app.data.settings[`${PREFIX}.vapid.public`]);
+    const promptOn  = isOn(this.setting(`${PREFIX}.pushPromptEnabled`)());
+    const hasVapid  = !!(app.data.settings[`${PREFIX}.vapid.public`]);
+    const badgeUrl  = app.data.settings[`${PREFIX}.badge_url`] as string | undefined;
 
     return (
       <div>
@@ -483,6 +461,45 @@ export default class PWAPage extends ExtensionPage {
           })}
         </FieldSet>
 
+        <FieldSet label={tr('push.badge_heading')}>
+          <p className="helpText">{tr('push.badge_help')}</p>
+
+          {badgeUrl && (
+            <div className="PWA-badge-preview">
+              <img src={badgeUrl} alt="Notification badge" className="PWA-badge-img" />
+              <button
+                className="Button Button--danger PWA-badge-delete"
+                onclick={this.deleteBadge.bind(this)}
+              >
+                <i className="fas fa-trash" style="margin-right: 6px;" />
+                {tr('push.badge_delete')}
+              </button>
+            </div>
+          )}
+
+          {this.badgeError && (
+            <p className="helpText" style="color: var(--control-danger-color); margin-bottom: 8px;">
+              {this.badgeError}
+            </p>
+          )}
+
+          <div>
+            <label className="Button Button--primary" style="cursor: pointer;">
+              {this.badgeUploading
+                ? <><i className="fas fa-spinner fa-spin" style="margin-right: 6px;" />{tr('push.badge_uploading')}</>
+                : <><i className="fas fa-upload" style="margin-right: 6px;" />{badgeUrl ? tr('push.badge_replace') : tr('push.badge_upload')}</>
+              }
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/gif,image/webp"
+                style="display: none;"
+                disabled={this.badgeUploading}
+                onchange={this.onBadgeFileChange.bind(this)}
+              />
+            </label>
+          </div>
+        </FieldSet>
+
         <FieldSet label={tr('push.misc_heading')}>
           {this.buildSettingComponent({
             setting: `${PREFIX}.userMaxSubscriptions`,
@@ -500,6 +517,49 @@ export default class PWAPage extends ExtensionPage {
         </FieldSet>
       </div>
     );
+  }
+
+  private onBadgeFileChange(e: Event): void {
+    const file = (e.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+
+    this.badgeUploading = true;
+    this.badgeError = null;
+    m.redraw();
+
+    const formData = new FormData();
+    formData.append('badge', file);
+
+    fetch(`${app.forum.attribute('apiUrl')}/resofire-pwa/badge`, {
+      method: 'POST',
+      headers: { 'X-CSRF-Token': app.session.csrfToken as string },
+      body: formData,
+    })
+      .then((r) => r.json())
+      .then((data: any) => {
+        if (data.url) {
+          app.data.settings[`${PREFIX}.badge_url`] = data.url;
+        } else {
+          this.badgeError = data.error || tr('push.badge_upload_error');
+        }
+        this.badgeUploading = false;
+        m.redraw();
+      })
+      .catch(() => {
+        this.badgeError = tr('push.badge_upload_error');
+        this.badgeUploading = false;
+        m.redraw();
+      });
+  }
+
+  private deleteBadge(): void {
+    app.request({
+      method: 'DELETE',
+      url:    `${app.forum.attribute('apiUrl')}/resofire-pwa/badge`,
+    }).then(() => {
+      app.data.settings[`${PREFIX}.badge_url`] = '';
+      m.redraw();
+    });
   }
 
   private generateVapidKeys(): void {

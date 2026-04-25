@@ -16,10 +16,12 @@ export interface IResettableColorFieldAttrs extends ComponentAttrs {
 const HEX_RE = /^#[0-9a-fA-F]{6}$/;
 
 export default class ResettableColorField extends Component<IResettableColorFieldAttrs> {
+  private colorInputRef: HTMLInputElement | null = null;
+
   view(): Mithril.Children {
     const { stream, label, help, placeholder } = this.attrs;
-    const value    = stream() || '';
-    const isValid  = HEX_RE.test(value);
+    const value       = stream() || '';
+    const isValid     = HEX_RE.test(value);
     const swatchColor = isValid ? value : (placeholder || '#888888');
 
     return (
@@ -41,9 +43,8 @@ export default class ResettableColorField extends Component<IResettableColorFiel
             onblur={(e: Event) => {
               const val = (e.target as HTMLInputElement).value.trim();
               // Allow empty — empty means "use forum default".
-              // Only sanitise if the user has typed something that isn't valid hex.
+              // Only sanitise if the user typed something invalid.
               if (val !== '' && !HEX_RE.test(val)) {
-                // Expand 3-digit shorthand
                 const short = val.replace(/^#?([a-f0-9])([a-f0-9])([a-f0-9])$/i, '#$1$1$2$2$3$3');
                 stream(HEX_RE.test(short) ? short : '');
               } else {
@@ -52,9 +53,27 @@ export default class ResettableColorField extends Component<IResettableColorFiel
               m.redraw();
             }}
           />
+
+          {/* Hidden native color picker — triggered by clicking the swatch */}
+          <input
+            className="ResettableColorField-picker"
+            type="color"
+            value={isValid ? value : (placeholder || '#888888')}
+            oncreate={(vnode: Mithril.VnodeDOM<any, any>) => {
+              this.colorInputRef = vnode.dom as HTMLInputElement;
+            }}
+            oninput={(e: Event) => {
+              const val = (e.target as HTMLInputElement).value;
+              stream(val);
+              m.redraw();
+            }}
+          />
+
           <span
             className="ResettableColorField-swatch"
             style={{ backgroundColor: swatchColor }}
+            onclick={() => this.colorInputRef?.click()}
+            title="Pick a color"
           />
         </div>
 
