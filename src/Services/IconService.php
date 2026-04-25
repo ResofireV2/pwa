@@ -107,9 +107,8 @@ class IconService
         $this->deleteBadge();
 
         $sourcePath = $file->getStream()->getMetadata('uri');
-        $encoded    = $this->imageManager->read($sourcePath)
+        $encoded = $this->imageManager->read($sourcePath)
             ->cover(96, 96)
-            ->greyscale()
             ->toPng();
 
         $filename = 'pwa-badge-' . Str::lower(Str::random(8)) . '.png';
