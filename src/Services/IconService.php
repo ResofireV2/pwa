@@ -107,9 +107,27 @@ class IconService
         $this->deleteBadge();
 
         $sourcePath = $file->getStream()->getMetadata('uri');
-        $encoded = $this->imageManager->read($sourcePath)
-            ->cover(96, 96)
-            ->toPng();
+        $image = $this->imageManager->read($sourcePath)->cover(96, 96);
+
+        // Badge masks require white pixels on transparent background.
+        // Android and Chrome use the badge as a mask: white pixels are shown
+        // in the system notification color, transparent pixels are hidden.
+        // We convert every non-transparent pixel to white.
+        $gd = $image->core()->native();
+        imagealphablending($gd, false);
+        imagesavealpha($gd, true);
+        for ($x = 0; $x < 96; $x++) {
+            for ($y = 0; $y < 96; $y++) {
+                $rgba  = imagecolorat($gd, $x, $y);
+                $alpha = ($rgba >> 24) & 0x7F; // 0 = opaque, 127 = transparent
+                if ($alpha < 127) {
+                    // Non-transparent pixel — replace color with white, preserve alpha
+                    imagesetpixel($gd, $x, $y, imagecolorallocatealpha($gd, 255, 255, 255, $alpha));
+                }
+            }
+        }
+
+        $encoded = $image->toPng();
 
         $filename = 'pwa-badge-' . Str::lower(Str::random(8)) . '.png';
         $path     = "extensions/resofire-pwa/{$filename}";

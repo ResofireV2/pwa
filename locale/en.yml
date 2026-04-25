@@ -117,7 +117,7 @@ resofire-pwa:
       prompt_delay_help: "How long after the app opens before the prompt appears."
 
       badge_heading: Notification badge
-      badge_help: "Upload an image for the small badge icon shown on Android notifications. Use a transparent background and keep your logo within a circular safe zone — Android crops the badge to a circle and tints it to match the system color. Simple shapes work best. The server resizes it to 96×96px automatically."
+      badge_help: "Upload a PNG with a white logo on a transparent background. Android uses the image as a mask — white pixels are shown in the system notification color, transparent pixels are hidden. The background must be fully transparent, not black or any other color. Android crops the badge to a circle, so keep your logo centered with some padding around the edges. The server resizes it to 96×96px automatically."
       badge_upload: Upload badge image
       badge_replace: Replace badge image
       badge_uploading: Uploading…
