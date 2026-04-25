@@ -21,7 +21,10 @@ export default class PushModal extends Component<IPushModalAttrs> {
       <div className="PWA-push-backdrop">
         <div className="PWA-push-modal">
           <div className="PWA-push-modal-icon">
-            <i className="fas fa-bell" />
+            {app.forum.attribute<string>('resofire-pwa.icon192Url')
+              ? <img src={app.forum.attribute<string>('resofire-pwa.icon192Url')} className="PWA-push-modal-icon-img" alt="" />
+              : <i className="fas fa-bell" />
+            }
           </div>
 
           <h3 className="PWA-push-modal-title">{title}</h3>

@@ -168,5 +168,12 @@ return [
         ->serializeToForum('resofire-pwa.pushPromptEnabled', 'resofire-pwa.pushPromptEnabled', 'boolval')
         ->serializeToForum('resofire-pwa.pushPromptDelay',   'resofire-pwa.pushPromptDelay',   'intval')
         ->serializeToForum('resofire-pwa.pushPromptTitle',   'resofire-pwa.pushPromptTitle')
-        ->serializeToForum('resofire-pwa.pushPromptBody',    'resofire-pwa.pushPromptBody'),
+        ->serializeToForum('resofire-pwa.pushPromptBody',    'resofire-pwa.pushPromptBody')
+        // Serialize the 192px icon URL so forum components can display the PWA icon.
+        ->serializeToForum('resofire-pwa.icon192Url', 'resofire-pwa.icon_192_path', function (?string $path) {
+            if (!$path) return null;
+            return resolve(\Illuminate\Contracts\Filesystem\Factory::class)
+                ->disk('flarum-assets')
+                ->url($path);
+        }),
 ];

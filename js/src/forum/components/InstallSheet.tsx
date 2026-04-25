@@ -57,7 +57,10 @@ export default class InstallSheet extends Component<IInstallSheetAttrs> {
 
           <div className="PWA-sheet-header">
             <div className="PWA-sheet-icon">
-              <i className="fas fa-mobile-alt" />
+              {app.forum.attribute<string>('resofire-pwa.icon192Url')
+                ? <img src={app.forum.attribute<string>('resofire-pwa.icon192Url')} className="PWA-sheet-icon-img" alt="" />
+                : <i className="fas fa-mobile-alt" />
+              }
             </div>
             <div className="PWA-sheet-title">
               {app.translator.trans('resofire-pwa.forum.sheet.title', { appName })}
