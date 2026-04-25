@@ -87,6 +87,9 @@ class NotificationBuilder
             case Post::class:
                 /** @var Post $subject */
                 return $subject instanceof CommentPost ? $subject->formatContent() : '';
+
+            case 'Flarum\Messages\DialogMessage':
+                return method_exists($subject, 'formatContent') ? $subject->formatContent() : '';
         }
 
         return '';
@@ -110,6 +113,12 @@ class NotificationBuilder
                 /** @var Post $subject */
                 return $this->url->to('forum')->route('discussion', [
                     'id'   => $subject->discussion_id,
+                    'near' => $subject->number,
+                ]);
+
+            case 'Flarum\Messages\DialogMessage':
+                return $this->url->to('forum')->route('messages.dialog', [
+                    'id'   => $subject->dialog_id,
                     'near' => $subject->number,
                 ]);
         }
