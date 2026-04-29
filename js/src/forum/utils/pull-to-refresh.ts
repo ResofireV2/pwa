@@ -25,6 +25,23 @@ const MAX_PULL = 120;
 /** Resistance factor — makes the pull feel springy rather than 1:1. */
 const RESISTANCE = 2.5;
 
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+/**
+ * Returns the current vertical scroll position regardless of which element
+ * is actually tracking the scroll. On iOS Safari, body { overflow-x: hidden }
+ * (used by some themes) causes window.scrollY to always report 0 while the
+ * actual scroll is tracked on document.documentElement or document.body.
+ * Checking all three covers this edge case.
+ */
+function getScrollY(): number {
+  return Math.max(
+    window.scrollY,
+    document.documentElement.scrollTop,
+    document.body.scrollTop,
+  );
+}
+
 // ── State ──────────────────────────────────────────────────────────────────────
 
 let startY     = 0;
@@ -81,7 +98,7 @@ function resetIndicator(): void {
 
 function onTouchStart(e: TouchEvent): void {
   if (refreshing) return;
-  if (window.scrollY > 0) return;
+  if (getScrollY() > 0) return;
 
   startY   = e.touches[0].clientY;
   currentY = 0;
@@ -95,7 +112,7 @@ function onTouchMove(e: TouchEvent): void {
   const deltaY = touchY - startY;
 
   // Only handle pull gesture when at the very top of the page.
-  if (window.scrollY > 0) {
+  if (getScrollY() > 0) {
     // User has scrolled down — cancel any active pull and allow normal scrolling.
     if (pulling) {
       pulling = false;
