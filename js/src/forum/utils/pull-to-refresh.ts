@@ -42,6 +42,24 @@ function getScrollY(): number {
   );
 }
 
+/**
+ * Returns true if the touch originated inside a scrollable container that
+ * is already scrolled down. This prevents PTR from triggering when the user
+ * is scrolling inside an inner scroll area (e.g. a chat message stream).
+ */
+function isInsideScrolledContainer(target: EventTarget | null): boolean {
+  let el = target as HTMLElement | null;
+  while (el && el !== document.body) {
+    if (el.scrollTop > 0) return true;
+    const style = window.getComputedStyle(el);
+    const overflowY = style.overflowY;
+    // If this element can scroll but is at top, it could still scroll down.
+    // We only care if it IS already scrolled — checked above.
+    el = el.parentElement;
+  }
+  return false;
+}
+
 // ── State ──────────────────────────────────────────────────────────────────────
 
 let startY     = 0;
@@ -99,6 +117,7 @@ function resetIndicator(): void {
 function onTouchStart(e: TouchEvent): void {
   if (refreshing) return;
   if (getScrollY() > 0) return;
+  if (isInsideScrolledContainer(e.target)) return;
 
   startY   = e.touches[0].clientY;
   currentY = 0;
