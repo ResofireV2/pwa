@@ -410,3 +410,45 @@
   color: var(--enabled-color);
   margin-bottom: 10px;
 }
+
+// ── Pull to refresh indicator (iOS standalone only) ───────────────────────────
+
+.PWA-ptr-indicator {
+  position: fixed;
+  top: -48px;
+  left: 50%;
+  transform: translateX(-50%) translateY(0);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: @body-bg;
+  box-shadow: 0 2px 8px @shadow;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 1100;
+  transition: opacity 0.1s ease;
+}
+
+.PWA-ptr-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid @border;
+  border-top-color: @primary;
+  border-radius: 50%;
+  transition: border-top-color 0.2s ease;
+
+  .PWA-ptr-indicator.is-ready & {
+    border-top-color: var(--enabled-color);
+  }
+
+  .PWA-ptr-indicator.is-refreshing & {
+    animation: pwa-ptr-spin 0.7s linear infinite;
+  }
+}
+
+@keyframes pwa-ptr-spin {
+  to { transform: rotate(360deg); }
+}

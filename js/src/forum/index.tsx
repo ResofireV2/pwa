@@ -9,6 +9,7 @@ import InstallBanner from './components/InstallBanner';
 import InstallSheet from './components/InstallSheet';
 import ApplePrompt from './components/ApplePrompt';
 import PushModal, { subscribeUserToPush } from './components/PushModal';
+import { initPullToRefresh } from './utils/pull-to-refresh';
 import {
   isStandalone,
   isIOS,
@@ -35,6 +36,9 @@ let showBanner = false;
 let showSheet  = false;
 
 app.initializers.add('resofire-pwa', () => {
+
+  // ── Pull to refresh (iOS standalone only) ────────────────────────────────
+  initPullToRefresh();
 
   // ── beforeinstallprompt ──────────────────────────────────────────────────
   window.addEventListener('beforeinstallprompt', (e) => {
