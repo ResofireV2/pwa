@@ -90,13 +90,13 @@ function onTouchStart(e: TouchEvent): void {
 
 function onTouchMove(e: TouchEvent): void {
   if (refreshing) return;
-  if (window.scrollY > 0) return;
 
   const touchY = e.touches[0].clientY;
   const deltaY = touchY - startY;
 
-  if (deltaY <= 0) {
-    // Scrolling up or no movement — not a pull.
+  // Only handle pull gesture when at the very top of the page.
+  if (window.scrollY > 0) {
+    // User has scrolled down — cancel any active pull and allow normal scrolling.
     if (pulling) {
       pulling = false;
       resetIndicator();
@@ -104,11 +104,21 @@ function onTouchMove(e: TouchEvent): void {
     return;
   }
 
-  // We have a downward pull from the top.
+  if (deltaY <= 0) {
+    // Scrolling up or no movement — cancel pull and allow normal scroll.
+    if (pulling) {
+      pulling = false;
+      resetIndicator();
+    }
+    return;
+  }
+
+  // We are at the top and pulling downward — take over the gesture.
   pulling  = true;
   currentY = deltaY;
 
-  // Prevent the page from bouncing/scrolling while we handle the gesture.
+  // Only preventDefault when we are actively handling the pull.
+  // This allows normal upward scrolling to work when not pulling.
   e.preventDefault();
 
   const progress = Math.min(currentY / RESISTANCE / THRESHOLD, 1);
