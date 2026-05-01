@@ -36,12 +36,10 @@ export default class InstallSheet extends Component<IInstallSheetAttrs> {
       || app.forum.attribute<string>('title')
       || '';
 
-    const showOffline    = app.forum.attribute<boolean>('resofire-pwa.androidSheetFeatureOffline')    ?? true;
     const showPush       = app.forum.attribute<boolean>('resofire-pwa.androidSheetFeaturePush')       ?? true;
     const showFullscreen = app.forum.attribute<boolean>('resofire-pwa.androidSheetFeatureFullscreen') ?? true;
 
     const features: { icon: string; label: string }[] = [];
-    if (showOffline)    features.push({ icon: 'fas fa-wifi',    label: app.translator.trans('resofire-pwa.forum.sheet.feature_offline')    as string });
     if (showPush)       features.push({ icon: 'fas fa-bell',    label: app.translator.trans('resofire-pwa.forum.sheet.feature_push')       as string });
     if (showFullscreen) features.push({ icon: 'fas fa-expand',  label: app.translator.trans('resofire-pwa.forum.sheet.feature_fullscreen') as string });
 

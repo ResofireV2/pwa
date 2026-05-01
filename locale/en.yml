@@ -60,7 +60,6 @@ resofire-pwa:
       sheet_enabled_help: "A bottom sheet with feature highlights appears on the user's second visit, overlaying the banner."
       sheet_delay_label: Sheet delay (milliseconds)
       sheet_delay_help: "How long after page load before the sheet slides up."
-      sheet_feature_offline_label: Highlight offline support
       sheet_feature_push_label: Highlight push notifications
       sheet_feature_fullscreen_label: Highlight full-screen experience
 
@@ -174,7 +173,6 @@ resofire-pwa:
     sheet:
       title: "Install {appName}"
       subtitle: "Add to your home screen for a faster, app-like experience."
-      feature_offline: Works offline
       feature_push: Push notifications
       feature_fullscreen: Full-screen experience
       install: Add to home screen

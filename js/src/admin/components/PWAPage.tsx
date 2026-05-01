@@ -299,11 +299,6 @@ export default class PWAPage extends ExtensionPage {
             min:   0,
           })}
           {sheetOn && this.buildSettingComponent({
-            setting: `${PREFIX}.androidSheetFeatureOffline`,
-            label: tr('android.sheet_feature_offline_label'),
-            type:  'bool',
-          })}
-          {sheetOn && this.buildSettingComponent({
             setting: `${PREFIX}.androidSheetFeaturePush`,
             label: tr('android.sheet_feature_push_label'),
             type:  'bool',
