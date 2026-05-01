@@ -2,7 +2,6 @@ import app from 'flarum/forum/app';
 import { extend } from 'flarum/common/extend';
 import Page from 'flarum/common/components/Page';
 import Notices from 'flarum/forum/components/Notices';
-import { openDB } from 'idb';
 import type ItemList from 'flarum/common/utils/ItemList';
 import type Mithril from 'mithril';
 import InstallBanner from './components/InstallBanner';
@@ -21,10 +20,6 @@ import {
   isBannerDismissed,
   isInstalled,
 } from './utils/install-state';
-
-const DB_NAME    = 'keyval-store';
-const DB_VERSION = 1;
-const STORE_NAME = 'keyval';
 
 const PUSH_PROMPTED_KEY = 'pwa.push.prompted';
 
@@ -63,8 +58,6 @@ app.initializers.add('resofire-pwa', () => {
   });
 
   extend(Page.prototype, 'oncreate', function () {
-    notifyPageVisit();
-
     // Show push modal on first standalone launch only.
     if (isStandalone()) {
       maybeShowPushModal();
@@ -249,8 +242,6 @@ async function registerServiceWorker(basePath: string): Promise<void> {
   if (!('serviceWorker' in navigator)) return;
 
   try {
-    await writeForumPayload();
-
     await navigator.serviceWorker.register(
       basePath + '/sw',
       { scope: basePath + '/' }
@@ -273,32 +264,4 @@ async function registerServiceWorker(basePath: string): Promise<void> {
   }
 }
 
-// ── IDB helpers ───────────────────────────────────────────────────────────────
 
-async function writeForumPayload(): Promise<void> {
-  try {
-    const db = await openDB(DB_NAME, DB_VERSION, {
-      upgrade(db) {
-        db.createObjectStore(STORE_NAME);
-      },
-    });
-
-    await db.put(STORE_NAME, app.forum.data.attributes, 'flarum.forumPayload');
-  } catch {
-    // IDB write failure should never break the forum.
-  }
-}
-
-// ── Page visit tracking ───────────────────────────────────────────────────────
-
-function notifyPageVisit(): void {
-  const controller = navigator.serviceWorker?.controller;
-  if (!controller) return;
-
-  const title = document.title;
-  const url   = window.location.href;
-
-  if (!title || !url) return;
-
-  controller.postMessage({ type: 'PAGE_VISIT', url, title });
-}

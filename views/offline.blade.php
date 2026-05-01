@@ -15,7 +15,6 @@
             --text:        #1a1a2e;
             --muted:       #6b7280;
             --border:      #e5e7eb;
-            --success:     #22c55e;
         }
 
         @media (prefers-color-scheme: dark) {
@@ -158,81 +157,7 @@
             height: 14px;
         }
 
-        /* ── Recent pages ── */
-        .recent {
-            width: 100%;
-            max-width: 540px;
-        }
 
-        .recent-label {
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.07em;
-            text-transform: uppercase;
-            color: var(--muted);
-            margin-bottom: 10px;
-        }
-
-        .recent-list {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .recent-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 14px;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            text-decoration: none;
-            color: var(--text);
-            font-size: 13px;
-            font-weight: 500;
-            transition: border-color 0.12s;
-        }
-
-        .recent-item:hover { border-color: var(--theme); }
-
-        .recent-item-dot {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: var(--success);
-            flex-shrink: 0;
-        }
-
-        .recent-item-title {
-            flex: 1;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .recent-item-badge {
-            font-size: 10px;
-            font-weight: 600;
-            padding: 2px 7px;
-            border-radius: 4px;
-            background: var(--bg);
-            color: var(--muted);
-            border: 1px solid var(--border);
-            white-space: nowrap;
-            flex-shrink: 0;
-        }
-
-        .recent-empty {
-            font-size: 13px;
-            color: var(--muted);
-            text-align: center;
-            padding: 16px;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-        }
     </style>
 </head>
 <body>
@@ -280,15 +205,7 @@
             </button>
         </div>
 
-        <div class="recent">
-            <p class="recent-label" id="recent-label" style="display:none;">
-                {{ $translator->trans('resofire-pwa.views.offline.recent_heading') }}
-            </p>
-            <ul class="recent-list" id="recent-list"></ul>
-            <p class="recent-empty" id="recent-empty" style="display:none;">
-                {{ $translator->trans('resofire-pwa.views.offline.recent_empty') }}
-            </p>
-        </div>
+
 
     </main>
 
@@ -297,72 +214,6 @@
         window.addEventListener('online', function () {
             location.reload();
         });
-
-        // Load recently visited pages from IndexedDB.
-        (function () {
-            var DB_NAME   = 'keyval-store';
-            var STORE     = 'keyval';
-            var KEY       = 'resofire-pwa.recentPages';
-            var cachedLabel = document.getElementById('recent-label');
-            var list      = document.getElementById('recent-list');
-            var empty     = document.getElementById('recent-empty');
-
-            var req = indexedDB.open(DB_NAME, 1);
-
-            req.onsuccess = function () {
-                var db = req.result;
-
-                if (!db.objectStoreNames.contains(STORE)) {
-                    showEmpty();
-                    return;
-                }
-
-                var tx    = db.transaction(STORE, 'readonly');
-                var store = tx.objectStore(STORE);
-                var get   = store.get(KEY);
-
-                get.onsuccess = function () {
-                    var pages = get.result;
-                    if (!pages || !pages.length) {
-                        showEmpty();
-                        return;
-                    }
-                    cachedLabel.style.display = '';
-                    pages.forEach(function (page) {
-                        var li = document.createElement('li');
-                        var a  = document.createElement('a');
-                        a.className = 'recent-item';
-                        a.href      = page.url;
-
-                        var dot = document.createElement('div');
-                        dot.className = 'recent-item-dot';
-
-                        var title = document.createElement('span');
-                        title.className   = 'recent-item-title';
-                        title.textContent = page.title;
-
-                        var badge = document.createElement('span');
-                        badge.className   = 'recent-item-badge';
-                        badge.textContent = '{{ $translator->trans("resofire-pwa.views.offline.cached_badge") }}';
-
-                        a.appendChild(dot);
-                        a.appendChild(title);
-                        a.appendChild(badge);
-                        li.appendChild(a);
-                        list.appendChild(li);
-                    });
-                };
-
-                get.onerror = showEmpty;
-            };
-
-            req.onerror = showEmpty;
-
-            function showEmpty() {
-                cachedLabel.style.display = '';
-                empty.style.display = '';
-            }
-        })();
     </script>
 
 </body>

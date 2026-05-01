@@ -164,9 +164,6 @@ resofire-pwa:
       body: "No internet connection right now. Check your connection and try again."
       retry: "Try again"
       pill: "Offline"
-      recent_heading: "Recently visited"
-      recent_empty: "No cached pages yet. Visit some discussions while online and they will appear here."
-      cached_badge: "Cached"
 
   forum:
     banner:
