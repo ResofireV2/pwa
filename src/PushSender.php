@@ -43,7 +43,7 @@ class PushSender
 
     public function notify(BlueprintInterface $blueprint, array $userIds = []): void
     {
-        $users = User::whereIn('id', $userIds)->get()->all();
+        $users = User::whereIn('id', $userIds)->with('pushSubscriptions')->get()->all();
 
         $this->log('[PWA PUSH] Notification type: ' . $blueprint::getType());
         $this->log('[PWA PUSH] Sending for user IDs: ' . json_encode(Arr::pluck($users, 'id')));
@@ -101,7 +101,9 @@ class PushSender
 
         $this->log("[PWA PUSH] Attempting to send {$sendingCount} notifications.");
 
-        $sentCount = 0;
+        $sentCount         = 0;
+        $successEndpoints  = [];
+        $failedEndpoints   = [];
 
         /** @var MessageSentReport $report */
         foreach ($webPush->flush() as $report) {
@@ -110,15 +112,25 @@ class PushSender
 
                 // Remove expired or invalid subscriptions.
                 if (in_array($statusCode, [401, 403, 404, 410], true)) {
-                    PushSubscription::where('endpoint', $report->getEndpoint())->delete();
+                    $failedEndpoints[] = $report->getEndpoint();
                 } else {
                     $this->log('[PWA PUSH] Notification failed for ' . $report->getEndpoint() . ': ' . $report->getReason());
                 }
             } else {
-                PushSubscription::where('endpoint', $report->getEndpoint())
-                    ->update(['last_used' => Carbon::now()]);
+                $successEndpoints[] = $report->getEndpoint();
                 $sentCount++;
             }
+        }
+
+        // Batch delete invalid subscriptions.
+        if (!empty($failedEndpoints)) {
+            PushSubscription::whereIn('endpoint', $failedEndpoints)->delete();
+        }
+
+        // Batch update last_used for successful sends.
+        if (!empty($successEndpoints)) {
+            PushSubscription::whereIn('endpoint', $successEndpoints)
+                ->update(['last_used' => Carbon::now()]);
         }
 
         $this->log("[PWA PUSH] Sent {$sentCount} notifications successfully.");

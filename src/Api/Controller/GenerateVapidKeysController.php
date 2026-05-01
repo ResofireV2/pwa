@@ -11,7 +11,6 @@
 
 namespace Resofire\PWA\Api\Controller;
 
-use ErrorException;
 use Flarum\Http\RequestUtil;
 use Flarum\Settings\SettingsRepositoryInterface;
 use Laminas\Diactoros\Response\JsonResponse;
@@ -33,7 +32,7 @@ class GenerateVapidKeysController implements RequestHandlerInterface
 
         try {
             $keys = VAPID::createVapidKeys();
-        } catch (ErrorException $e) {
+        } catch (\Throwable $e) {
             return new JsonResponse(['error' => $e->getMessage()], 500);
         }
 

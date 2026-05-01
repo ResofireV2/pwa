@@ -19,7 +19,6 @@ use Flarum\Notification\MailableInterface;
 use Flarum\Post\CommentPost;
 use Flarum\Post\Post;
 use Flarum\User\User;
-use ReflectionClass;
 
 class NotificationBuilder
 {
@@ -42,7 +41,7 @@ class NotificationBuilder
      */
     public function supports(string $blueprintClass): bool
     {
-        return (new ReflectionClass($blueprintClass))->implementsInterface(MailableInterface::class)
+        return is_a($blueprintClass, MailableInterface::class, true)
             || in_array($blueprintClass, self::SUPPORTED_NON_MAILABLE, true);
     }
 

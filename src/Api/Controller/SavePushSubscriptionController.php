@@ -55,8 +55,14 @@ class SavePushSubscriptionController implements RequestHandlerInterface
             return new JsonResponse(['error' => 'Endpoint is required.'], 422);
         }
 
-        // Validate endpoint host against the allowlist.
+        // Validate endpoint is HTTPS and host is on the allowlist.
+        $scheme  = parse_url($endpoint, PHP_URL_SCHEME) ?: '';
         $host    = parse_url($endpoint, PHP_URL_HOST) ?: '';
+
+        if ($scheme !== 'https') {
+            return new JsonResponse(['error' => 'Endpoint must use HTTPS.'], 403);
+        }
+
         $allowed = collect(self::ALLOWED_HOSTS)->contains(
             fn(string $h) => $host === $h || Str::endsWith($host, '.' . $h)
         );

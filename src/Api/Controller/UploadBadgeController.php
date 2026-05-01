@@ -12,6 +12,7 @@
 namespace Resofire\PWA\Api\Controller;
 
 use Flarum\Http\RequestUtil;
+use Intervention\Image\Exceptions\DecoderException;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -40,7 +41,15 @@ class UploadBadgeController implements RequestHandlerInterface
             return new JsonResponse(['error' => 'Badge must be a PNG, JPEG, GIF, or WebP image.'], 422);
         }
 
-        $result = $this->iconService->generateBadge($file);
+        if ($file->getSize() > 5 * 1024 * 1024) {
+            return new JsonResponse(['error' => 'File must not exceed 5 MB.'], 422);
+        }
+
+        try {
+            $result = $this->iconService->generateBadge($file);
+        } catch (DecoderException $e) {
+            return new JsonResponse(['error' => 'The uploaded file could not be read as an image.'], 422);
+        }
 
         return new JsonResponse([
             'path' => $result['path'],

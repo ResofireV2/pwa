@@ -46,6 +46,7 @@ $metaClosure = function (Document $document) {
     $document->head[] = "<meta id='apple-title' name='apple-mobile-web-app-title' content='" . htmlspecialchars($appName, ENT_QUOTES, 'UTF-8') . "'>";
 
     // Apple touch icon tags — Safari uses these for the home screen icon on iOS.
+    // Resolve the assets disk once rather than once per icon size.
     /** @var \Illuminate\Contracts\Filesystem\Cloud $assets */
     $assets = resolve(\Illuminate\Contracts\Filesystem\Factory::class)->disk('flarum-assets');
 
